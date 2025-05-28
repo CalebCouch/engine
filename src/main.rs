@@ -7,16 +7,7 @@ use std::time::Instant;
 use dyn_clone::DynClone;
 use dyn_clone::clone_trait_object;
 
-pub struct Shoot{
-	execute(&self, board: &mut HashMap<etc>, current_coord: Coord)
-}
-pub struct Move{}
-pub struct Remove{
-}
 
-pub trait Action {
-	execute(&self, board: &mut HashMap<etc>, current_coord: Coord)
-}
 pub enum Action{
 	Shoot,
 	Move(Coord),
