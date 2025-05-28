@@ -1,0 +1,9 @@
+[package]
+name = "engine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rust_on_rails = "4.0.2"
+pelican_ui = "1.0.6"
+log = "0.4.27"
