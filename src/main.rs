@@ -29,7 +29,7 @@ impl Application for App {
                     color: Color(0, 0, 255, 255)
                 },
                 Box::new(RowOfEllipseRect(
-                    Row::new(30.0, Offset::Static(20.0), Size::Fit, Padding::new(0.0)), 
+                    Row::new(30.0, Offset::Center, Size::Static(300.0), Padding::new(0.0)), 
                     Shape{
                         shape: ShapeType::Ellipse(10.0, (200.0, 400.0)),
                         color: Color(255, 255, 0, 255)
