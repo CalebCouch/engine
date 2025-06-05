@@ -1,5 +1,4 @@
 use pelican_ui::*;
-<<<<<<< HEAD
 use pelican_ui::drawable::{Drawable, Shape, ShapeType, Color};
 use pelican_ui::layout::DefaultStack;
 use pelican_ui::events::Event;
@@ -7,7 +6,6 @@ use pelican_ui::events::Event;
 #[derive(Debug)]
 pub struct TwoObjectsStacked(DefaultStack, Shape, Box<dyn  Drawable>);
 impl Event for TwoObjectsStacked {}
-=======
 use pelican_ui::drawable::{Component, Drawable, Shape, ShapeType, Color};
 use pelican_ui::layout::{DefaultStack, SizeRequest, Area, Layout};
 use pelican_ui::events::OnEvent;
@@ -25,14 +23,12 @@ impl OnEvent for TwoObjectsStacked {}
 #[derive(Component, Debug)]
 pub struct RowOfEllipseRect(Row, Shape, Shape);
 impl OnEvent for RowOfEllipseRect {}
->>>>>>> a9eaab514d4633bc4a61bc0a2f64c024afd0fb8e
 
 #[derive(Clone)]
 struct App;
 
 impl Application for App {
     async fn new(_ctx: &mut Context) -> Box<dyn Drawable> {
-<<<<<<< HEAD
         Box::new(Shape{
             shape: ShapeType::Rectangle(20.0, (200.0, 200.0)),
             color: Color(255, 0, 0, 255)
@@ -40,8 +36,7 @@ impl Application for App {
 		Box::new(Shape{
             shape: ShapeType::Ellipse(20.0, (200.0, 180.0)),
             color: Color(255, 0, 0, 255)
-        })
-=======
+        });
         Box::new(
             TwoObjectsStacked(DefaultStack,
                 Shape{
@@ -61,7 +56,6 @@ impl Application for App {
                 ))
             )
         )
->>>>>>> a9eaab514d4633bc4a61bc0a2f64c024afd0fb8e
     }
 }
 impl Services for App {}
