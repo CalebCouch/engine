@@ -1,5 +1,11 @@
 use pelican_ui::*;
 use pelican_ui::drawable::{Drawable, Shape, ShapeType, Color};
+use pelican_ui::layout::DefaultStack;
+use pelican_ui::events::Event;
+
+#[derive(Debug)]
+pub struct TwoObjectsStacked(DefaultStack, Shape, Box<dyn  Drawable>);
+impl Event for TwoObjectsStacked {}
 
 #[derive(Clone)]
 struct App;
@@ -9,9 +15,22 @@ impl Application for App {
         Box::new(Shape{
             shape: ShapeType::Rectangle(20.0, (200.0, 200.0)),
             color: Color(255, 0, 0, 255)
+        });
+		Box::new(Shape{
+            shape: ShapeType::Ellipse(20.0, (200.0, 180.0)),
+            color: Color(255, 0, 0, 255)
         })
     }
 }
 impl Services for App {}
 
 start!(App);
+//NOTE: default stack theory: it stacks elements
+//NOTE: Shape is self explanatory
+//NOTE: Box<dyn Drawable> dynamically resizes to the item at compiler time.drawable returns the shapes
+//NOTE: trait Event detects any inputs from the user
+//NOTE: App is the main structure essentially.
+//NOTE: Application trait is the window we're drawing on
+//NOTE: async new constructor is where you're creating the objects. it takes in ctx and returns a drawable item.
+//NOTE: box is an object that initializes new shapes.
+//NOTE: inside Shape {} we create the shape with its width and offset/ color with its hex codes
