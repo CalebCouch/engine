@@ -1,48 +1,33 @@
 use pelican_ui::*;
-use pelican_ui::drawable::{Component, Drawable, Shape, ShapeType, Color};
-use pelican_ui::layout::{DefaultStack, SizeRequest, Area, Layout};
-use pelican_ui::events::OnEvent;
+use runtime::{self, Service, ServiceList, ThreadContext, async_trait, Services};
 
-mod layouts;
-use layouts::{Row, Stack, Offset, Size, Padding};
+use pelican_ui::drawable::Component;
 
-mod elements;
-use elements::Rectangle;
+use pelican_ui_std::layout::*;
 
-#[derive(Component, Debug)]
-pub struct TwoObjectsStacked(DefaultStack, Shape, Box<dyn Drawable>);
-impl OnEvent for TwoObjectsStacked {}
+use pelican_ui::events::{Event};
+use pelican_ui::drawable::{Shape, Color, Drawable, ShapeType};
 
-#[derive(Component, Debug)]
-pub struct RowOfEllipseRect(Row, Shape, Shape);
-impl OnEvent for RowOfEllipseRect {}
+use std::collections::BTreeMap;
+use serde::{Serialize, Deserialize};
+use std::time::Duration;
 
-#[derive(Clone)]
-struct App;
+pub struct TestApp;
+impl Plugins for TestApp {
+    fn plugins(ctx: &mut Context) -> Vec<Box<dyn Plugin>> {vec![]}
+}
+impl Services for TestApp {}
+start!(TestApp);
+fn main() {
+    maverick_main();
+}
 
-impl Application for App {
-    async fn new(_ctx: &mut Context) -> Box<dyn Drawable> {
-        Box::new(
-            TwoObjectsStacked(DefaultStack,
-                Shape{
-                    shape: ShapeType::Rectangle(20.0, (200.0, 200.0)),
-                    color: Color(0, 0, 255, 255)
-                },
-                Box::new(RowOfEllipseRect(
-                    Row::new(30.0, Offset::Center, Size::Static(300.0), Padding::new(0.0)), 
-                    Shape{
-                        shape: ShapeType::Ellipse(10.0, (200.0, 400.0)),
-                        color: Color(255, 255, 0, 255)
-                    },
-                    Shape{
-                        shape: ShapeType::Rectangle(20.0, (200.0, 200.0)),
-                        color: Color(255, 0, 0, 255)
-                    },
-                ))
-            )
-        )
+
+impl Application for TestApp {
+    async fn new(_context: &mut Context) -> Box<dyn Drawable> {
+        Box::new(Shape{
+            shape: ShapeType::Ellipse(0.0, (400.0, 400.0)),
+            color: Color(0, 0, 255, 255)
+        })
     }
 }
-impl Services for App {}
-
-start!(App);

@@ -4,4 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-pelican_ui = {path = "../pelican_ui"}
+maverick_os = "0.1.7"
+pelican_ui = "1.1.1"
+pelican_ui_std = "0.2.2"
+serde = "1.0.219"
+
