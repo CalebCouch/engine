@@ -24,7 +24,7 @@ fn main() {
 impl Application for TestApp {
     async fn new(_context: &mut Context) -> Box<dyn Drawable> {
         Box::new(Shape{
-            shape: ShapeType::Ellipse(0.0, (400.0, 400.0), 0.0),
+            shape: ShapeType::Ellipse(0.0, (400.0, 400.0)),
             color: Color(0, 0, 255, 255)
         })
     }
