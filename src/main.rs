@@ -37,6 +37,19 @@ impl Application for TestApp {
 }
 
 #[derive(Debug, Component)]
+pub struct MyComponent(Stack, Shape);
+impl OnEvent for MyComponent {}
+impl MyComponent {
+    pub fn new() -> Self {
+        MyComponent(Stack::default(), Shape{
+            shape: ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0),
+            color: Color(0, 0, 255, 255)
+        })
+    }
+}
+ 
+
+#[derive(Debug, Component)]
 pub struct FirstScreen(Stack, Page);
 impl OnEvent for FirstScreen {}
 
@@ -54,7 +67,7 @@ impl FirstScreen {
         let text = Text::new(ctx, "Hello World!", TextStyle::Heading, font_size.h2, Align::Center);
         let subtext = ExpandableText::new(ctx, "First project loaded successfully.", TextStyle::Primary, font_size.md, Align::Center, None);
 
-        let content = Content::new(ctx, Offset::Center, vec![Box::new(icon), Box::new(text), Box::new(subtext)]);
+        let content = Content::new(ctx, Offset::Center, vec![Box::new(MyComponent::new()), Box::new(icon), Box::new(text), Box::new(subtext)]);
 
         let header = Header::home(ctx, "My Screen", None);
 
