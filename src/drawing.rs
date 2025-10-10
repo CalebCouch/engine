@@ -74,8 +74,12 @@ pub struct Canvas(CanvasLayout, Vec<Shape>);
 impl OnEvent for Canvas {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-		} else if let Some(MouseEvent{position: my_position, state: MouseState::Pressed}) = event.downcast_ref::<MouseEvent>() {
+		} else if let Some(MouseEvent{position: my_position, state: my_state}) = event.downcast_ref::<MouseEvent>() {
 			println!("{:?}", my_position);
+			println!("{:?}", my_state);
+			if *my_state == MouseState::Pressed {
+				self.0.0.push(my_position);
+			}
 		}
 		true
 	}
@@ -85,7 +89,6 @@ impl Canvas {
         Canvas(
 			CanvasLayout(vec![
 				(0.0, 0.0), (50.0, 50.0)
-			    //TODO: needs to offsets (0.0, 0.0) because the below vector has two shapes		
 			]),
 			vec![
 				Shape{
