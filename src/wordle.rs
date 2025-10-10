@@ -1,5 +1,4 @@
-/*use std::collections::HashMap;
-use crate::drawable::Image;
+use std::collections::HashMap;
 use rand::prelude::*;
 use rand::seq::SliceRandom;
 use std::fs::File;
@@ -8,7 +7,7 @@ use std::any::Any;
 use pelican_ui::*;
 use runtime::{self, Service, ServiceList, ThreadContext, async_trait, Services};
 use serde::de::Unexpected::Str;
-use pelican_ui::drawable::Component;
+use pelican_ui::drawable::{Component, Image};
 
 use pelican_ui::events::{Event, OnEvent, TickEvent, KeyboardEvent, KeyboardState, NamedKey, Key};
 use pelican_ui::drawable::{Shape, Color, Drawable, ShapeType, Align};
@@ -24,11 +23,6 @@ impl Plugins for TestApp {
     fn plugins(ctx: &mut Context) -> Vec<Box<dyn Plugin>> {vec![]}
 }
 impl Services for TestApp {}
-start!(TestApp);
-fn main() {
-    maverick_main();
-}
-
 
 impl Application for TestApp {
     async fn new(ctx: &mut Context) -> Box<dyn Drawable> {
@@ -288,10 +282,4 @@ impl SecondPage {
         let content = Content::new(ctx, Offset::Center, child);
 		SecondPage(Stack::default(), Page::new(Some(header), content, None))
 	}
-}*/
-use pelican_ui::{maverick_start, MaverickOS, PelicanEngine};
-mod drawing;
-pelican_ui::start!(drawing::TestApp);
-fn main() {
-    maverick_main();
 }
