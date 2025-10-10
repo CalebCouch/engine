@@ -70,12 +70,24 @@ impl Event for NavEvent{
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(Stack, Vec<Shape>);
-impl OnEvent for Canvas {}
+pub struct Canvas(CanvasLayout, Vec<Shape>);
+impl OnEvent for Canvas {
+	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		} else if let Some(MouseEvent{position: my_position, state: MouseState::Pressed}) = event.downcast_ref::<MouseEvent>() {
+			println!("{:?}", my_position);
+		}
+		true
+	}
+}
 impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
-			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			CanvasLayout{
+				vec![
+					
+				]
+			},
 			vec![
 				Shape{
             		shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0),
@@ -92,15 +104,7 @@ impl Canvas {
 //display ellipse when mouse is clicked
 #[derive(Debug, Component)]
 pub struct FirstScreen(Stack, Page);
-impl OnEvent for FirstScreen {
-	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
-		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-		} else if let Some(MouseEvent{position: my_position, state: MouseState::Pressed}) = event.downcast_ref::<MouseEvent>() {
-			println!("{:?}", my_position);
-		}
-		true
-	}
-}
+impl OnEvent for FirstScreen {}
 
 impl AppPage for FirstScreen {
 	fn has_nav(&self) -> bool { true }
