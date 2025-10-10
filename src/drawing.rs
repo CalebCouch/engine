@@ -137,3 +137,16 @@ impl FirstScreen {
      }
  }
 
+#[derive(Debug)]
+pub struct CanvasLayout(Vec<(f32, f32)>);//A vector of offsets (left, top)
+impl Layout for CanvasLayout {
+    fn request_size(&self, _ctx: &mut Context, children: Vec<SizeRequest>) -> SizeRequest {
+        SizeRequest::new(0.0, 0.0, f32::MAX, f32::MAX)
+    }
+
+    fn build(&self, _ctx: &mut Context, size: (f32, f32), children: Vec<SizeRequest>) -> Vec<Area> {
+        self.0.iter().copied().zip(children).map(|(offset, child)|
+            Area{offset, size: child.get((size.0-offset.0, size.1-offset.1))}
+        ).collect()
+    }
+}
