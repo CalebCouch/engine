@@ -89,13 +89,14 @@ impl Canvas {
 		)
     }
 }
-
+//display ellipse when mouse is clicked
 #[derive(Debug, Component)]
 pub struct FirstScreen(Stack, Page);
 impl OnEvent for FirstScreen {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(MouseEvent{position: my_position, state: MouseState::Pressed}) = event.downcast_ref::<MouseEvent>() {
+			println!("{:?}", my_position);
 		}
 		true
 	}
