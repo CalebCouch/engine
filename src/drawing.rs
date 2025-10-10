@@ -84,6 +84,7 @@ impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
 			CanvasLayout(vec![
+				(0.0, 0.0), (50.0, 50.0)
 			    //TODO: needs to offsets (0.0, 0.0) because the below vector has two shapes		
 			]),
 			vec![
