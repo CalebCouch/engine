@@ -83,11 +83,9 @@ impl OnEvent for Canvas {
 impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
-			CanvasLayout{
-				vec![
-					
-				]
-			},
+			CanvasLayout(vec![
+			    //TODO: needs to offsets (0.0, 0.0) because the below vector has two shapes		
+			]),
 			vec![
 				Shape{
             		shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0),
@@ -149,6 +147,7 @@ impl Layout for CanvasLayout {
     }
 
     fn build(&self, _ctx: &mut Context, size: (f32, f32), children: Vec<SizeRequest>) -> Vec<Area> {
+        if self.0.len() != children.len() {panic!("CanvasLayout does not have the same number of offsets as children");}
         self.0.iter().copied().zip(children).map(|(offset, child)|
             Area{offset, size: child.get((size.0-offset.0, size.1-offset.1))}
         ).collect()
