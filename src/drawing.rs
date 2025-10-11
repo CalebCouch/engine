@@ -70,8 +70,27 @@ impl Event for NavEvent{
 }
 
 #[derive(Debug, Component)]
-pub struct Brush(Stack, Button);
-impl OnEvent for Brush{}
+pub struct Button(Stack, Shape);
+impl OnEvent for Button{
+fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
+
+		}
+		true
+	}
+}
+impl Button {
+	fn new(ctx: &mut Context) -> Self {
+		Button(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Rectangle(0.0, (55.0, 55.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+		)
+	}
+}
 
 #[derive(Debug, Component)]
 pub struct Canvas(CanvasLayout, Vec<Shape>, #[skip] bool);
@@ -113,14 +132,12 @@ impl AppPage for FirstScreen {
 
 impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
-		let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonState::Default, OffSet::Center, OnClick, Some("Hello"))
-		 let bumper = Bumper::single_button(ctx, 
+		//let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonStyle::Primary, ButtonState::Default, Offset::Center, |ctx: &mut Context| {}, Some("Hello".to_string()));
+		//let bumper = Bumper::single_button(ctx, button);
 		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
-		let current = 0;
-		FirstScreen(Stack::default(), Page::new(Some(header), content, Some()))
-
+		FirstScreen(Stack::default(), Page::new(Some(header), content, None))
     }
 }
 
@@ -139,7 +156,7 @@ impl FirstScreen {
          let child: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx))];
          let header = Header::home(ctx, "CONGRATULATIONS", None);
          let content = Content::new(ctx, Offset::Center, child);
-         SecondPage(Stack::default(), Page::new(Some(header), content, None)
+         SecondPage(Stack::default(), Page::new(Some(header), content, None))
      }
  }
 
