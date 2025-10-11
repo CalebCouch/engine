@@ -70,15 +70,23 @@ impl Event for NavEvent{
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Vec<Shape>);
+pub struct Brush(Stack, Button);
+impl OnEvent for Brush{}
+
+#[derive(Debug, Component)]
+pub struct Canvas(CanvasLayout, Vec<Shape>, #[skip] bool);
 impl OnEvent for Canvas {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-		} else if let Some(MouseEvent{position: my_position, state: my_state}) = event.downcast_ref::<MouseEvent>() {
+		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
 			println!("{:?}", my_position);
 			println!("{:?}", my_state);
 			if *my_state == MouseState::Pressed {
-				self.0.0.push(my_position);
+				self.2 = !self.2;
+			}
+			if self.2 == true {
+				self.0.0.push(*my_position);
+				self.1.push(Shape{shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0), color: Color::from_hex("#FFD700", 255),})
 			}
 		}
 		true
@@ -87,19 +95,9 @@ impl OnEvent for Canvas {
 impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
-			CanvasLayout(vec![
-				(0.0, 0.0), (50.0, 50.0)
-			]),
-			vec![
-				Shape{
-            		shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0),
-            		color: Color::from_hex("#000000", 255),
-        		},
-				Shape{
-            		shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0),
-            		color: Color::from_hex("#000000", 255),
-        		},
-			],
+			CanvasLayout(vec![]),
+			vec![],
+			false
 		)
     }
 }
@@ -115,11 +113,13 @@ impl AppPage for FirstScreen {
 
 impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
+		let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonState::Default, OffSet::Center, OnClick, Some("Hello"))
+		 let bumper = Bumper::single_button(ctx, 
 		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
 		let current = 0;
-		FirstScreen(Stack::default(), Page::new(Some(header), content, None))
+		FirstScreen(Stack::default(), Page::new(Some(header), content, Some()))
 
     }
 }
@@ -139,7 +139,7 @@ impl FirstScreen {
          let child: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx))];
          let header = Header::home(ctx, "CONGRATULATIONS", None);
          let content = Content::new(ctx, Offset::Center, child);
-         SecondPage(Stack::default(), Page::new(Some(header), content, None))
+         SecondPage(Stack::default(), Page::new(Some(header), content, None)
      }
  }
 
