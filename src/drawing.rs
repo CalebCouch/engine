@@ -77,11 +77,8 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
 			if *my_state == MouseState::Pressed {
 				println!("it worked");
-				//TODO: we need to use .push on a variable or field, but how? i can't use self for obvious reasons. 
-				//maybe this isn't what he wants me to do. i do need to change the shape, not necessarily insert a new shape into the vec hmmm
-				//so he want to have a global variable but im unsure how to create it. maybe use static?
-				ctx.state().get::<Canvas>().unwrap().1 = push(Shape{shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0), color: Color::from_hex("#FFD700", 255),});
-				ctx.state().get::<Canvas>().unwrap().0
+				ctx.state().set(Brush::Square);
+				//ctx.state().get_mut::<Canvas>().unwrap().1 = push(Shape{shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0), color: Color::from_hex("#FFD700", 255),});
 			}
 		}
 		true
@@ -116,8 +113,10 @@ impl OnEvent for Canvas {
 				println!("drawing is enabled {}", self.2);
 			}
 			if self.2 == true {
-				self.0.0.push(*my_position);
-				//push(Shape{shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0), color: Color::from_hex("#FFD700", 255),})
+				if ctx.state().get_or_default::<Brush>() == Brush::Ellipse {
+					self.0.0.push(*my_position);
+					self.1.push(Shape{shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0), color: Color::from_hex("#FFD700", 255),});
+				}
 			}
 		}
 		true
@@ -185,4 +184,11 @@ impl Layout for CanvasLayout {
             Area{offset, size: child.get((size.0-offset.0, size.1-offset.1))}
         ).collect()
     }
+}
+#[derive(Default, Debug)]
+pub enum Brush {
+	#[default]
+	Ellipse,
+	Square,
+	RoundedSquare,
 }
