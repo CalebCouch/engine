@@ -75,11 +75,20 @@ impl OnEvent for Bumper {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
-			if *my_state == MouseState::Pressed {
-				println!("it worked");
-				ctx.state().set(Brush::Square);
-				//ctx.state().get_mut::<Canvas>().unwrap().1 = push(Shape{shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0), color: Color::from_hex("#FFD700", 255),});
-			}
+			match *my_state {
+				MouseState::Pressed => {
+					ctx.state().set(Brush::RoundedRectangle);
+				},
+				MouseState::Moved => {
+					
+				},
+				MouseState::Released => {
+
+				},
+				_ => {
+
+				}
+			};
 		}
 		true
 	}
@@ -93,7 +102,7 @@ impl Bumper {
 				color: Color::from_hex("#000000", 255),
 			},
 			Shape{
-				shape: ShapeType::Rectangle(0.0, (55.0, 55.0), 0.0),
+				shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0),
 				color: Color::from_hex("#0000FF", 255),
 			},
 		)
@@ -113,9 +122,20 @@ impl OnEvent for Canvas {
 				println!("drawing is enabled {}", self.2);
 			}
 			if self.2 == true {
-				if ctx.state().get_or_default::<Brush>() == Brush::Ellipse {
-					self.0.0.push(*my_position);
-					self.1.push(Shape{shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0), color: Color::from_hex("#FFD700", 255),});
+				match *ctx.state().get_or_default::<Brush>() {
+					Brush::Ellipse => {
+						self.0.0.push(*my_position);
+						self.1.push(Shape{shape: ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0), color: Color::from_hex("#FFD700", 255),});
+					},
+					Brush::Rectangle => {
+						self.0.0.push(*my_position);
+						self.1.push(Shape{shape: ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0), color: Color::from_hex("#FFD700", 255),});
+					},
+					Brush::RoundedRectangle => {
+						self.0.0.push(*my_position);
+						self.1.push(Shape{shape: ShapeType::RoundedRectangle(0.0, (20.0, 20.0), 20.0, 0.0), color: Color::from_hex("#FFD700", 255),});
+					},
+					_ => {},
 				}
 			}
 		}
@@ -189,6 +209,6 @@ impl Layout for CanvasLayout {
 pub enum Brush {
 	#[default]
 	Ellipse,
-	Square,
-	RoundedSquare,
+	Rectangle,
+	RoundedRectangle,
 }
