@@ -69,8 +69,32 @@ impl Event for NavEvent{
 	}
 }
 
+//create row of Brushes for bottom bumper
+//create bumper above that's able to change colors and size
+//create a hex text input
+//Bumper is a column of BumperRow
+//BumperRow is a Row of Bumper Buttons
+
 #[derive(Debug, Component)]
-pub struct Bumper(Stack, Shape, Shape);
+pub struct Button(Stack, Shape);
+impl OnEvent for Button {}
+impl Button {
+	fn new(ctx: &mut Context) -> Self {
+		Button(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
+	}
+}
+#[derive(Debug, Component)]
+pub struct BumperRow(Row, Vec<Button>);
+impl OnEvent for BumperRow {}
+impl BumperRow {
+	fn new(ctx: &mut Context) -> Self {
+		BumperRow(Row::center(40.0), vec![Button::new(ctx)])
+
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct Bumper(Stack, Shape, Vec<BumperRow>);
 impl OnEvent for Bumper {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -93,19 +117,17 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		true
 	}
 }
+
 impl Bumper {
 	fn new(ctx: &mut Context) -> Self {
 		Bumper(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Rectangle(0.0, (480.0, 55.0), 0.0),
+				shape: ShapeType::Rectangle(0.0, (450.0, 55.0), 0.0),
 				color: Color::from_hex("#000000", 255),
 			},
-			Shape{
-				shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0),
-				color: Color::from_hex("#0000FF", 255),
-			},
-		)
+			vec![BumperRow::new(ctx)])
+			/*Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)},*/
 	}
 }
 
@@ -122,21 +144,13 @@ impl OnEvent for Canvas {
 				println!("drawing is enabled {}", self.2);
 			}
 			if self.2 == true {
-				match *ctx.state().get_or_default::<Brush>() {
-					Brush::Ellipse => {
-						self.0.0.push(*my_position);
-						self.1.push(Shape{shape: ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0), color: Color::from_hex("#FFD700", 255),});
-					},
-					Brush::Rectangle => {
-						self.0.0.push(*my_position);
-						self.1.push(Shape{shape: ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0), color: Color::from_hex("#FFD700", 255),});
-					},
-					Brush::RoundedRectangle => {
-						self.0.0.push(*my_position);
-						self.1.push(Shape{shape: ShapeType::RoundedRectangle(0.0, (20.0, 20.0), 20.0, 0.0), color: Color::from_hex("#FFD700", 255),});
-					},
-					_ => {},
-				}
+				self.0.0.push(*my_position);
+				let shape = match *ctx.state().get_or_default::<Brush>() {
+					Brush::Ellipse => ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0),
+					Brush::Rectangle => ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0),
+					Brush::RoundedRectangle => ShapeType::RoundedRectangle(0.0, (20.0, 20.0), 20.0, 0.0),
+				};
+				self.1.push(Shape{shape, color: Color::from_hex("#FFD700", 255),});
 			}
 		}
 		true
@@ -165,7 +179,7 @@ impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
 		//let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonStyle::Primary, ButtonState::Default, Offset::Center, |ctx: &mut Context| {}, Some("Hello".to_string()));
 		//let bumper = Bumper::single_button(ctx, button);
-		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)), Box::new(Bumper::new(ctx))];
+		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Bumper::new(ctx)), Box::new(Canvas::new(ctx)), Box::new(Bumper::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
 		FirstScreen(Stack::default(), Page::new(Some(header), content, None))
