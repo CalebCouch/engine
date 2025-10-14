@@ -94,7 +94,7 @@ impl Hex {
 			},
 			Text::new(
 				ctx,
-				" ",
+				"",
 				TextStyle::Primary,
 				50.0,
 				Align::Left,
@@ -104,6 +104,7 @@ impl Hex {
 }
 
 #[derive(Debug, Component)]
+//so we want to .get each button and have an event tied to them.
 pub struct Button(Stack, Shape);
 impl OnEvent for Button {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
@@ -111,7 +112,12 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
 			match *my_state {
 				MouseState::Pressed => {
-					ctx.state().set(Brush::RoundedRectangle);
+					let test = ctx.state().get::<BumperRow>().unwrap().1;
+					match test {
+						val if val == ctx.state().get::<BumperRow>().unwrap().1 => {
+							ctx.state().set(Brush::RoundedRectangle);
+						}
+					}
 				},
 				MouseState::Moved => {
 					
@@ -134,11 +140,11 @@ impl Button {
 	}
 }
 #[derive(Debug, Component)]
-pub struct BumperRow(Row, Vec<Button>);
+pub struct BumperRow(Row, Button, Button);
 impl OnEvent for BumperRow {}
 impl BumperRow {
 	pub fn new(ctx: &mut Context) -> Self {
-		BumperRow(Row::center(40.0), vec![Button::new(ctx), Button::new(ctx)])
+		BumperRow(Row::center(40.0), Button::new(ctx), Button::new(ctx))
 
 	}
 }
