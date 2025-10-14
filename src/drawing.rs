@@ -225,11 +225,20 @@ impl OnEvent for FirstScreen {
 			if let Some(key) = my_key.to_text() {
 				let text = Text::new(ctx, self.2.as_str(), TextStyle::Primary, 16.0, Align::Left);
 				match my_key {
-					k =>  if let Some(key) = k.to_text() {
+					k => {
 						self.1.content().find_at::<Hex>(2).unwrap().2 = text;
 						self.2.push_str(key);
 					}
 				}
+				if Key::Named(NamedKey::Enter) == *my_key {
+					self.2.clear();
+				}
+				if Key::Named(NamedKey::Backspace) == *my_key {
+                     let backspace = Text::new(ctx, self.2.as_str(), TextStyle::Primary, 16.0, Align::Left);
+                     self.1.content().find_at::<Hex>(2).unwrap().2 = backspace;
+                     self.2.pop();
+                     self.2.pop();
+                }
 			}
 		}
 		true
