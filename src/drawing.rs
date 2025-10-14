@@ -74,28 +74,38 @@ impl Event for NavEvent{
 //create a hex text input
 //Bumper is a column of BumperRow
 //BumperRow is a Row of Bumper Buttons
+//have a u32 variable and match on it. if it's 1 we .set() Brush to Ellipse, 2 to Rectangle, etc.. to achieve this tho we need button events to be isolated from each other
+
+//questions for caleb:
+//how can we isolate events for each button
+//how can we change how many buttons we have for each bumper
+//could we use find_at and do the events in Firstscreen??
+
+#[derive(Debug, Component)]
+pub struct Hex(Stack, Shape, Text);
+impl OnEvent for Hex {}
+impl Hex {
+	pub fn new(ctx: &mut Context) -> Self {
+		Hex(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Rectangle(5.0, (55.0, 55.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+			Text::new(
+				ctx,
+				" ",
+				TextStyle::Primary,
+				50.0,
+				Align::Left,
+			)
+		)
+	}
+}
 
 #[derive(Debug, Component)]
 pub struct Button(Stack, Shape);
-impl OnEvent for Button {}
-impl Button {
-	fn new(ctx: &mut Context) -> Self {
-		Button(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
-	}
-}
-#[derive(Debug, Component)]
-pub struct BumperRow(Row, Vec<Button>);
-impl OnEvent for BumperRow {}
-impl BumperRow {
-	fn new(ctx: &mut Context) -> Self {
-		BumperRow(Row::center(40.0), vec![Button::new(ctx)])
-
-	}
-}
-
-#[derive(Debug, Component)]
-pub struct Bumper(Stack, Shape, Vec<BumperRow>);
-impl OnEvent for Bumper {
+impl OnEvent for Button {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
@@ -118,8 +128,48 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	}
 }
 
+impl Button {
+	pub fn new(ctx: &mut Context) -> Self {
+		Button(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
+	}
+}
+#[derive(Debug, Component)]
+pub struct BumperRow(Row, Vec<Button>);
+impl OnEvent for BumperRow {}
+impl BumperRow {
+	pub fn new(ctx: &mut Context) -> Self {
+		BumperRow(Row::center(40.0), vec![Button::new(ctx), Button::new(ctx)])
+
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct Bumper(Stack, Shape, Vec<BumperRow>);
+impl OnEvent for Bumper {
+/*fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
+			match *my_state {
+				MouseState::Pressed => {
+					ctx.state().set(Brush::RoundedRectangle);
+				},
+				MouseState::Moved => {
+					
+				},
+				MouseState::Released => {
+
+				},
+				_ => {
+
+				}
+			};
+		}
+		true
+	}*/
+}
+
 impl Bumper {
-	fn new(ctx: &mut Context) -> Self {
+	pub fn new(ctx: &mut Context) -> Self {
 		Bumper(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
@@ -167,8 +217,24 @@ impl Canvas {
 }
 //display ellipse when mouse is clicked
 #[derive(Debug, Component)]
-pub struct FirstScreen(Stack, Page);
-impl OnEvent for FirstScreen {}
+pub struct FirstScreen(Stack, Page, #[skip] String);
+impl OnEvent for FirstScreen {
+	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
+			if let Some(key) = my_key.to_text() {
+				let text = Text::new(ctx, self.2.as_str(), TextStyle::Primary, 16.0, Align::Left);
+				match my_key {
+					k =>  if let Some(key) = k.to_text() {
+						self.1.content().find_at::<Hex>(2).unwrap().2 = text;
+						self.2.push_str(key);
+					}
+				}
+			}
+		}
+		true
+	}
+}
 
 impl AppPage for FirstScreen {
 	fn has_nav(&self) -> bool { true }
@@ -179,10 +245,10 @@ impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
 		//let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonStyle::Primary, ButtonState::Default, Offset::Center, |ctx: &mut Context| {}, Some("Hello".to_string()));
 		//let bumper = Bumper::single_button(ctx, button);
-		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Bumper::new(ctx)), Box::new(Canvas::new(ctx)), Box::new(Bumper::new(ctx))];
+		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Bumper::new(ctx)), Box::new(Canvas::new(ctx)), Box::new(Hex::new(ctx)), Box::new(Bumper::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
-		FirstScreen(Stack::default(), Page::new(Some(header), content, None))
+		FirstScreen(Stack::default(), Page::new(Some(header), content, None), String::new())
     }
 }
 
