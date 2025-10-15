@@ -89,14 +89,14 @@ impl Hex {
 		Hex(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Rectangle(5.0, (55.0, 55.0), 0.0),
+				shape: ShapeType::Rectangle(5.0, (180.0, 55.0), 0.0),
 				color: Color::from_hex("#000000", 255),
 			},
 			Text::new(
 				ctx,
-				"",
+				"INSERT HEX CODE",
 				TextStyle::Primary,
-				50.0,
+				18.0,
 				Align::Left,
 			)
 		)
@@ -288,21 +288,26 @@ impl OnEvent for FirstScreen {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			if let Some(key) = my_key.to_text() {
-				let text = Text::new(ctx, self.2.as_str(), TextStyle::Primary, 16.0, Align::Left);
-				match my_key {
-					k => {
-						self.1.content().find_at::<Hex>(2).unwrap().2 = text;
-						self.2.push_str(key);
+				if self.2.len() < 7 {
+					match my_key {
+						k => {
+							self.2.push_str(key);
+							let text = Text::new(ctx, self.2.as_str(), TextStyle::Primary, 16.0, Align::Left);
+							self.1.content().find_at::<Hex>(2).unwrap().2 = text;
+						}
 					}
 				}
 				if Key::Named(NamedKey::Enter) == *my_key {
-					self.2.clear();
+					//create logic to match against Hex
+					//do we need to parse? couldn't we just use .get() to get access to the color field and change it directly? hmmmm will finish later
+					self.2.parse();
+					ctx.state().get::<Button>().unwrap().1;
 				}
 				if Key::Named(NamedKey::Backspace) == *my_key {
+                     self.2.pop();
+                     self.2.pop();
                      let backspace = Text::new(ctx, self.2.as_str(), TextStyle::Primary, 16.0, Align::Left);
                      self.1.content().find_at::<Hex>(2).unwrap().2 = backspace;
-                     self.2.pop();
-                     self.2.pop();
                 }
 			}
 		}
