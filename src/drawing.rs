@@ -103,8 +103,9 @@ impl Hex {
 	}
 }
 
+
+
 #[derive(Debug, Component)]
-//so we want to .get each button and have an event tied to them.
 pub struct Button(Stack, Shape);
 impl OnEvent for Button {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
@@ -112,15 +113,10 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
 			match *my_state {
 				MouseState::Pressed => {
-					let test = ctx.state().get::<BumperRow>().unwrap().1;
-					match test {
-						val if val == ctx.state().get::<BumperRow>().unwrap().1 => {
-							ctx.state().set(Brush::RoundedRectangle);
-						}
-					}
+					ctx.state().set(Brush::RoundedRectangle);
 				},
 				MouseState::Moved => {
-					
+
 				},
 				MouseState::Released => {
 
@@ -139,13 +135,75 @@ impl Button {
 		Button(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
 	}
 }
+
 #[derive(Debug, Component)]
-pub struct BumperRow(Row, Button, Button);
+pub struct ButtonTwo(Stack, Shape);
+impl OnEvent for ButtonTwo {
+fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
+			match *my_state {
+				MouseState::Pressed => {
+					ctx.state().set(Brush::Rectangle);
+				},
+				MouseState::Moved => {
+
+				},
+				MouseState::Released => {
+
+				},
+				_ => {
+
+				}
+			};
+		}
+		true
+	}
+}
+
+impl ButtonTwo {
+	pub fn new(ctx: &mut Context) -> Self {
+		ButtonTwo(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct ButtonThree(Stack, Shape);
+impl OnEvent for ButtonThree {
+fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
+			match *my_state {
+				MouseState::Pressed => {
+					ctx.state().set(Brush::Ellipse);
+				},
+				MouseState::Moved => {
+
+				},
+				MouseState::Released => {
+
+				},
+				_ => {
+
+				}
+			};
+		}
+		true
+	}
+}
+
+impl ButtonThree {
+	pub fn new(ctx: &mut Context) -> Self {
+		ButtonThree(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct BumperRow(Row, Button, ButtonTwo, ButtonThree);
 impl OnEvent for BumperRow {}
 impl BumperRow {
 	pub fn new(ctx: &mut Context) -> Self {
-		BumperRow(Row::center(40.0), Button::new(ctx), Button::new(ctx))
-
+		BumperRow(Row::center(40.0), Button::new(ctx), ButtonTwo::new(ctx), ButtonThree::new(ctx))
 	}
 }
 
