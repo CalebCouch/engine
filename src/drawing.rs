@@ -103,8 +103,6 @@ impl Hex {
 	}
 }
 
-
-
 #[derive(Debug, Component)]
 pub struct Button(Stack, Shape);
 impl OnEvent for Button {
@@ -199,39 +197,26 @@ impl ButtonThree {
 }
 
 #[derive(Debug, Component)]
-pub struct BumperRow(Row, Button, ButtonTwo, ButtonThree);
+pub struct BumperRow(Row, Button);
 impl OnEvent for BumperRow {}
 impl BumperRow {
 	pub fn new(ctx: &mut Context) -> Self {
-		BumperRow(Row::center(40.0), Button::new(ctx), ButtonTwo::new(ctx), ButtonThree::new(ctx))
+		BumperRow(Row::center(40.0), Button::new(ctx))
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct BumperRowTwo(Row, Button, ButtonTwo, ButtonThree);
+impl OnEvent for BumperRowTwo {}
+impl BumperRowTwo {
+	pub fn new(ctx: &mut Context) -> Self {
+		BumperRowTwo(Row::center(40.0), Button::new(ctx), ButtonTwo::new(ctx), ButtonThree::new(ctx))
 	}
 }
 
 #[derive(Debug, Component)]
 pub struct Bumper(Stack, Shape, Vec<BumperRow>);
-impl OnEvent for Bumper {
-/*fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
-		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
-			match *my_state {
-				MouseState::Pressed => {
-					ctx.state().set(Brush::RoundedRectangle);
-				},
-				MouseState::Moved => {
-					
-				},
-				MouseState::Released => {
-
-				},
-				_ => {
-
-				}
-			};
-		}
-		true
-	}*/
-}
-
+impl OnEvent for Bumper {}
 impl Bumper {
 	pub fn new(ctx: &mut Context) -> Self {
 		Bumper(
@@ -240,8 +225,24 @@ impl Bumper {
 				shape: ShapeType::Rectangle(0.0, (450.0, 55.0), 0.0),
 				color: Color::from_hex("#000000", 255),
 			},
-			vec![BumperRow::new(ctx)])
-			/*Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)},*/
+			vec![BumperRow::new(ctx)]
+		)
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct BumperTwo(Stack, Shape, Vec<BumperRowTwo>);
+impl OnEvent for BumperTwo {}
+impl BumperTwo {
+	pub fn new(ctx: &mut Context) -> Self {
+		BumperTwo(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Rectangle(0.0, (450.0, 55.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+			vec![BumperRowTwo::new(ctx)]
+		)
 	}
 }
 
@@ -318,7 +319,7 @@ impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
 		//let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonStyle::Primary, ButtonState::Default, Offset::Center, |ctx: &mut Context| {}, Some("Hello".to_string()));
 		//let bumper = Bumper::single_button(ctx, button);
-		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Bumper::new(ctx)), Box::new(Canvas::new(ctx)), Box::new(Hex::new(ctx)), Box::new(Bumper::new(ctx))];
+		let children: Vec<Box<dyn Drawable>> = vec![Box::new(BumperTwo::new(ctx)), Box::new(Canvas::new(ctx)), Box::new(Hex::new(ctx)), Box::new(Bumper::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
 		FirstScreen(Stack::default(), Page::new(Some(header), content, None), String::new())
