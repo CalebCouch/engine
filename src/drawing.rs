@@ -307,12 +307,22 @@ impl OnEvent for FirstScreen {
 					}
 				}
 				if Key::Named(NamedKey::Enter) == *my_key {
-					//create logic to match against Hex
 					//create test for letters a-f and numbers 0-9
 					//create a collection for the letters and for the numbers we would maybe have to do the same thing or use a simple .len() lol
-					if let Ok(p_color) = Color::from_hex(self.2.as_str(), 255) {
-						self.1.content().find_at::<Button>(1).unwrap().1.color = p_color;
+					//what if they were together? we could iterate through the collection that holds all the values and match up. if they do then continue to next loop until you get to last char, which in that case we print the hex.
+					let hex = "#ABCDEF0123456789";
+					let hex_collect: Vec<char> = hex.chars().collect();
+					let input_collect: Vec<char> = self.2.chars().collect();
+					for (index, chars) in hex_collect.iter().enumerate() {
+						for chars_too in &input_collect {
+							if chars == chars_too[index] {
+								println!("yes");
+							}
+						}
 					}
+					/*if let Ok(p_color) = Color::from_hex(self.2.as_str(), 255) {
+						self.1.content().find_at::<Button>(1).unwrap().1.color = p_color;
+					}*/
 				}
 				if Key::Named(NamedKey::Backspace) == *my_key {
                      self.2.pop();
