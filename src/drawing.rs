@@ -197,11 +197,20 @@ impl ButtonThree {
 }
 
 #[derive(Debug, Component)]
-pub struct BumperRow(Row, Button);
+pub struct ButtonFour(Stack, Shape);
+impl OnEvent for ButtonFour {}
+impl ButtonFour {
+	pub fn new(ctx: &mut Context) -> Self {
+		ButtonFour(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#00FF00", 255)})
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct BumperRow(Row, ButtonFour, ButtonFour);
 impl OnEvent for BumperRow {}
 impl BumperRow {
 	pub fn new(ctx: &mut Context) -> Self {
-		BumperRow(Row::center(40.0), Button::new(ctx))
+		BumperRow(Row::center(40.0), ButtonFour::new(ctx), ButtonFour::new(ctx))
 	}
 }
 
@@ -222,7 +231,7 @@ impl Bumper {
 		Bumper(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Rectangle(0.0, (450.0, 55.0), 0.0),
+				shape: ShapeType::Rectangle(0.0, (380.0, 55.0), 0.0),
 				color: Color::from_hex("#000000", 255),
 			},
 			vec![BumperRow::new(ctx)]
@@ -238,7 +247,7 @@ impl BumperTwo {
 		BumperTwo(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Rectangle(0.0, (450.0, 55.0), 0.0),
+				shape: ShapeType::Rectangle(0.0, (380.0, 55.0), 0.0),
 				color: Color::from_hex("#000000", 255),
 			},
 			vec![BumperRowTwo::new(ctx)]
@@ -299,7 +308,11 @@ impl OnEvent for FirstScreen {
 				}
 				if Key::Named(NamedKey::Enter) == *my_key {
 					//create logic to match against Hex
-					self.1.content().find_at::<Button>(1).unwrap().1.color.4 = "hello";
+					//create test for letters a-f and numbers 0-9
+					//create a collection for the letters and for the numbers we would maybe have to do the same thing or use a simple .len() lol
+					if let Ok(p_color) = Color::from_hex(self.2.as_str(), 255) {
+						self.1.content().find_at::<Button>(1).unwrap().1.color = p_color;
+					}
 				}
 				if Key::Named(NamedKey::Backspace) == *my_key {
                      self.2.pop();
