@@ -299,9 +299,7 @@ impl OnEvent for FirstScreen {
 				}
 				if Key::Named(NamedKey::Enter) == *my_key {
 					//create logic to match against Hex
-					//do we need to parse? couldn't we just use .get() to get access to the color field and change it directly? hmmmm will finish later
-					self.2.parse();
-					ctx.state().get::<Button>().unwrap().1;
+					self.1.content().find_at::<Button>(1).unwrap().1.color.4 = "hello";
 				}
 				if Key::Named(NamedKey::Backspace) == *my_key {
                      self.2.pop();
