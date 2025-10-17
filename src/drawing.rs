@@ -312,17 +312,18 @@ impl OnEvent for FirstScreen {
 					//what if they were together? we could iterate through the collection that holds all the values and match up. if they do then continue to next loop until you get to last char, which in that case we print the hex.
 					let hex = "#ABCDEF0123456789";
 					let hex_collect: Vec<char> = hex.chars().collect();
-					let input_collect: Vec<char> = self.2.chars().collect();
-					for (index, chars) in hex_collect.iter().enumerate() {
-						for chars_too in &input_collect {
-							if chars == chars_too[index] {
-								println!("yes");
-							}
+					let input_collect: Vec<char> = self.2.to_uppercase().chars().collect();
+					for (index, chars) in input_collect.iter().enumerate() {
+						if !hex_collect.contains(chars) {
+							break;
+						}
+
+						if index == self.2.len() - 1 {
+						self.1.content().find_at::<Button>(1).unwrap().1.color = Color::from_hex(self.2.as_str(), 255);
 						}
 					}
-					/*if let Ok(p_color) = Color::from_hex(self.2.as_str(), 255) {
-						self.1.content().find_at::<Button>(1).unwrap().1.color = p_color;
-					}*/
+					//if let Ok(p_color) = Color::from_hex(self.2.as_str(), 255) {
+					//}
 				}
 				if Key::Named(NamedKey::Backspace) == *my_key {
                      self.2.pop();
