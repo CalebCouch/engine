@@ -268,13 +268,13 @@ impl OnEvent for Canvas {
 				println!("drawing is enabled {}", self.2);
 			}
 			if self.2 == true {
-				self.0.0.push(*my_position);
-				let shape = match *ctx.state().get_or_default::<Brush>() {
+				//self.0.0.push(*my_position);
+				/*let shape = match *ctx.state().get_or_default::<Brush>() {
 					Brush::Ellipse => ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0),
 					Brush::Rectangle => ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0),
 					Brush::RoundedRectangle => ShapeType::RoundedRectangle(0.0, (20.0, 20.0), 20.0, 0.0),
 				};
-				self.1.push(Shape{shape, color: Color::from_hex("#FFD700", 255),});
+				self.1.push(Shape{shape, color: Color::from_hex("#FFD700", 255),});*/
 			}
 		}
 		true
@@ -319,7 +319,17 @@ impl OnEvent for FirstScreen {
 						}
 
 						if index == self.2.len() - 1 {
-						self.1.content().find_at::<Button>(1).unwrap().1.color = Color::from_hex(self.2.as_str(), 255);
+						let shape = match *ctx.state().get_or_default::<Brush>() {
+							Brush::Ellipse => ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0),
+							Brush::Rectangle => ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0),
+							Brush::RoundedRectangle => ShapeType::RoundedRectangle(0.0, (20.0, 20.0), 20.0, 0.0),
+						};
+						self.1.content().find_at::<Canvas>(1).unwrap().0.0.push((0.0, 0.0));
+						self.1.content().find_at::<Canvas>(1).unwrap().1.push(Shape{shape, color: Color::from_hex(self.2.as_str(), 255)});
+
+						//we need to be able to change all the colors, not just one. so in Canvas is where we do that.
+						//we need to just directly push this color into the canvas struct.
+						//we need to somehow push current 
 						}
 					}
 					//if let Ok(p_color) = Color::from_hex(self.2.as_str(), 255) {
