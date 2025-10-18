@@ -197,7 +197,7 @@ impl ButtonThree {
 }
 
 #[derive(Debug, Component)]
-pub struct ButtonFour(Stack, Shape);
+pub struct ButtonSize(Stack, Shape);
 impl OnEvent for ButtonFour {}
 impl ButtonFour {
 	pub fn new(ctx: &mut Context) -> Self {
@@ -256,7 +256,7 @@ impl BumperTwo {
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Vec<Shape>, #[skip] bool, #[skip] bool);
+pub struct Canvas(CanvasLayout, Vec<Shape>, #[skip] bool, #[skip] String, #[skip] bool);
 impl OnEvent for Canvas {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -268,13 +268,17 @@ impl OnEvent for Canvas {
 				println!("drawing is enabled {}", self.2);
 			}
 			if self.2 == true {
-				self.0.0.push(*my_position);
 				let shape = match *ctx.state().get_or_default::<Brush>() {
 					Brush::Ellipse => ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0),
 					Brush::Rectangle => ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0),
 					Brush::RoundedRectangle => ShapeType::RoundedRectangle(0.0, (20.0, 20.0), 20.0, 0.0),
 				};
-				self.1.push(Shape{shape, color: Color::from_hex("#FFD700", 255),});
+				self.0.0.push(*my_position);
+				if self.4 == false {
+					self.1.push(Shape{shape, color: Color::from_hex("#FFD700", 255),});
+				} else {
+					self.1.push(Shape{shape, color: Color::from_hex(self.3.as_str(), 255),});
+				}
 			}
 		}
 		true
@@ -286,11 +290,12 @@ impl Canvas {
 			CanvasLayout(vec![]),
 			vec![],
 			false,
+			String::new(),
 			false,
 		)
     }
 }
-//display ellipse when mouse is clicked
+
 #[derive(Debug, Component)]
 pub struct FirstScreen(Stack, Page, #[skip] String);
 impl OnEvent for FirstScreen {
@@ -298,11 +303,11 @@ impl OnEvent for FirstScreen {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			if let Some(key) = my_key.to_text() {
-				if self.2.len() < 7 {
+				if self.1.content().find_at::<Canvas>(1).unwrap().3.len() < 7 {
 					match my_key {
 						k => {
-							self.2.push_str(key);
-							let text = Text::new(ctx, self.2.as_str(), TextStyle::Primary, 16.0, Align::Left);
+							self.1.content().find_at::<Canvas>(1).unwrap().3.push_str(key);
+							let text = Text::new(ctx, self.1.content().find_at::<Canvas>(1).unwrap().3.as_str(), TextStyle::Primary, 16.0, Align::Left);
 							self.1.content().find_at::<Hex>(2).unwrap().2 = text;
 						}
 					}
@@ -310,32 +315,24 @@ impl OnEvent for FirstScreen {
 				if Key::Named(NamedKey::Enter) == *my_key {
 					let hex = "#ABCDEF0123456789";
 					let hex_collect: Vec<char> = hex.chars().collect();
-					let input_collect: Vec<char> = self.2.to_uppercase().chars().collect();
+					let input_collect: Vec<char> = self.1.content().find_at::<Canvas>(1).unwrap().3.to_uppercase().chars().collect();
 					for (index, chars) in input_collect.iter().enumerate() {
 						if !hex_collect.contains(chars) {
 							break;
 						}
-
-						if index == self.2.len() - 1 {
-						self.1.content().find_at::<Canvas>(1).unwrap().3 = true;
-						let shape = match *ctx.state().get_or_default::<Brush>() {
-							Brush::Ellipse => ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0),
-							Brush::Rectangle => ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0),
-							Brush::RoundedRectangle => ShapeType::RoundedRectangle(0.0, (20.0, 20.0), 20.0, 0.0),
-						};
-						self.1.content().find_at::<Canvas>(1).unwrap().0.0.push((0.0, 0.0));
-						self.1.content().find_at::<Canvas>(1).unwrap().1.push(Shape{shape, color: Color::from_hex(self.2.as_str(), 255)});
+						if index == self.1.content().find_at::<Canvas>(1).unwrap().3.len() - 1 {
+						//self.1.content().find_at::<Canvas>(1).unwrap().1.push(Shape{shape, color: Color::from_hex(self.2.as_str(), 255)});
+						self.1.content().find_at::<Canvas>(1).unwrap().4 = true;
+						//set bool to true, if true set a variable to equal self.3 which we now insert as the argument for color
 						//so we have to be able to CONSTANTLY push that new color and coordinate, meaning we can't have it blocked behind enter. my idea was that we have some sort of bool that when active always pushes the new color, not just once, but idk.
 
 						}
 					}
-					//if let Ok(p_color) = Color::from_hex(self.2.as_str(), 255) {
-					//}
 				}
 				if Key::Named(NamedKey::Backspace) == *my_key {
-                     self.2.pop();
-                     self.2.pop();
-                     let backspace = Text::new(ctx, self.2.as_str(), TextStyle::Primary, 16.0, Align::Left);
+                     self.1.content().find_at::<Canvas>(1).unwrap().3.pop();
+                     self.1.content().find_at::<Canvas>(1).unwrap().3.pop();
+                     let backspace = Text::new(ctx, self.1.content().find_at::<Canvas>(1).unwrap().3.as_str(), TextStyle::Primary, 16.0, Align::Left);
                      self.1.content().find_at::<Hex>(2).unwrap().2 = backspace;
                 }
 			}
