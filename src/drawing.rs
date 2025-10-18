@@ -256,7 +256,7 @@ impl BumperTwo {
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Vec<Shape>, #[skip] bool);
+pub struct Canvas(CanvasLayout, Vec<Shape>, #[skip] bool, #[skip] bool);
 impl OnEvent for Canvas {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -268,13 +268,13 @@ impl OnEvent for Canvas {
 				println!("drawing is enabled {}", self.2);
 			}
 			if self.2 == true {
-				//self.0.0.push(*my_position);
-				/*let shape = match *ctx.state().get_or_default::<Brush>() {
+				self.0.0.push(*my_position);
+				let shape = match *ctx.state().get_or_default::<Brush>() {
 					Brush::Ellipse => ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0),
 					Brush::Rectangle => ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0),
 					Brush::RoundedRectangle => ShapeType::RoundedRectangle(0.0, (20.0, 20.0), 20.0, 0.0),
 				};
-				self.1.push(Shape{shape, color: Color::from_hex("#FFD700", 255),});*/
+				self.1.push(Shape{shape, color: Color::from_hex("#FFD700", 255),});
 			}
 		}
 		true
@@ -285,7 +285,8 @@ impl Canvas {
         Canvas(
 			CanvasLayout(vec![]),
 			vec![],
-			false
+			false,
+			false,
 		)
     }
 }
@@ -307,9 +308,6 @@ impl OnEvent for FirstScreen {
 					}
 				}
 				if Key::Named(NamedKey::Enter) == *my_key {
-					//create test for letters a-f and numbers 0-9
-					//create a collection for the letters and for the numbers we would maybe have to do the same thing or use a simple .len() lol
-					//what if they were together? we could iterate through the collection that holds all the values and match up. if they do then continue to next loop until you get to last char, which in that case we print the hex.
 					let hex = "#ABCDEF0123456789";
 					let hex_collect: Vec<char> = hex.chars().collect();
 					let input_collect: Vec<char> = self.2.to_uppercase().chars().collect();
@@ -319,6 +317,7 @@ impl OnEvent for FirstScreen {
 						}
 
 						if index == self.2.len() - 1 {
+						self.1.content().find_at::<Canvas>(1).unwrap().3 = true;
 						let shape = match *ctx.state().get_or_default::<Brush>() {
 							Brush::Ellipse => ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0),
 							Brush::Rectangle => ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0),
@@ -326,10 +325,8 @@ impl OnEvent for FirstScreen {
 						};
 						self.1.content().find_at::<Canvas>(1).unwrap().0.0.push((0.0, 0.0));
 						self.1.content().find_at::<Canvas>(1).unwrap().1.push(Shape{shape, color: Color::from_hex(self.2.as_str(), 255)});
+						//so we have to be able to CONSTANTLY push that new color and coordinate, meaning we can't have it blocked behind enter. my idea was that we have some sort of bool that when active always pushes the new color, not just once, but idk.
 
-						//we need to be able to change all the colors, not just one. so in Canvas is where we do that.
-						//we need to just directly push this color into the canvas struct.
-						//we need to somehow push current 
 						}
 					}
 					//if let Ok(p_color) = Color::from_hex(self.2.as_str(), 255) {
