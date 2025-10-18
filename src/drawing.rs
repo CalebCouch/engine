@@ -104,9 +104,9 @@ impl Hex {
 }
 
 #[derive(Debug, Component)]
-pub struct Button(Stack, Shape);
-impl OnEvent for Button {
-fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+pub struct ButtonColor(Stack, Shape);
+impl OnEvent for ButtonColor {
+	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
 			match *my_state {
@@ -128,16 +128,16 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	}
 }
 
-impl Button {
+impl ButtonColor {
 	pub fn new(ctx: &mut Context) -> Self {
-		Button(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
+		ButtonColor(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
 	}
 }
 
 #[derive(Debug, Component)]
-pub struct ButtonTwo(Stack, Shape);
-impl OnEvent for ButtonTwo {
-fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+pub struct ButtonColor2(Stack, Shape);
+impl OnEvent for ButtonColor2 {
+	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
 			match *my_state {
@@ -159,16 +159,16 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	}
 }
 
-impl ButtonTwo {
+impl ButtonColor2 {
 	pub fn new(ctx: &mut Context) -> Self {
-		ButtonTwo(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
+		ButtonColor2(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
 	}
 }
 
 #[derive(Debug, Component)]
-pub struct ButtonThree(Stack, Shape);
-impl OnEvent for ButtonThree {
-fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+pub struct ButtonColor3(Stack, Shape);
+impl OnEvent for ButtonColor3 {
+	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
 			match *my_state {
@@ -190,36 +190,121 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	}
 }
 
-impl ButtonThree {
+impl ButtonColor3 {
 	pub fn new(ctx: &mut Context) -> Self {
-		ButtonThree(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
+		ButtonColor3(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#0000FF", 255)})
 	}
 }
 
 #[derive(Debug, Component)]
 pub struct ButtonSize(Stack, Shape);
-impl OnEvent for ButtonFour {}
-impl ButtonFour {
+impl OnEvent for ButtonSize {
+	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
+			match *my_state {
+				MouseState::Pressed => {
+					ctx.state().set(ShapeSize::Twenty);
+				},
+				MouseState::Moved => {
+
+				},
+				MouseState::Released => {
+
+				},
+				_ => {
+
+				}
+			};
+		}
+		true
+	}
+}
+
+impl ButtonSize {
 	pub fn new(ctx: &mut Context) -> Self {
-		ButtonFour(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#00FF00", 255)})
+		ButtonSize(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#00FF00", 255)})
 	}
 }
 
 #[derive(Debug, Component)]
-pub struct BumperRow(Row, ButtonFour, ButtonFour);
+pub struct ButtonSize2(Stack, Shape);
+impl OnEvent for ButtonSize2 {
+	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
+			match *my_state {
+				MouseState::Pressed => {
+					ctx.state().set(ShapeSize::Fourty);
+				},
+				MouseState::Moved => {
+
+				},
+				MouseState::Released => {
+
+				},
+				_ => {
+
+				}
+			};
+		}
+		true
+	}
+}
+
+impl ButtonSize2 {
+	pub fn new(ctx: &mut Context) -> Self {
+		ButtonSize2(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#00FF00", 255)})
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct ButtonSize3(Stack, Shape);
+impl OnEvent for ButtonSize3 {
+	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
+			match *my_state {
+				MouseState::Pressed => {
+					ctx.state().set(ShapeSize::Sixty);
+				},
+				MouseState::Moved => {
+
+				},
+				MouseState::Released => {
+
+				},
+				_ => {
+
+				}
+			};
+		}
+		true
+	}
+}
+
+impl ButtonSize3 {
+	pub fn new(ctx: &mut Context) -> Self {
+		ButtonSize3(Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)), Shape{shape: ShapeType::RoundedRectangle(0.0, (55.0, 55.0), 20.0, 0.0), color: Color::from_hex("#00FF00", 255)})
+	}
+}
+
+
+#[derive(Debug, Component)]
+pub struct BumperRow(Row, ButtonSize, ButtonSize2, ButtonSize3);
 impl OnEvent for BumperRow {}
 impl BumperRow {
 	pub fn new(ctx: &mut Context) -> Self {
-		BumperRow(Row::center(40.0), ButtonFour::new(ctx), ButtonFour::new(ctx))
+		BumperRow(Row::center(40.0), ButtonSize::new(ctx), ButtonSize2::new(ctx), ButtonSize3::new(ctx))
 	}
 }
 
 #[derive(Debug, Component)]
-pub struct BumperRowTwo(Row, Button, ButtonTwo, ButtonThree);
+pub struct BumperRowTwo(Row, ButtonColor, ButtonColor2, ButtonColor3);
 impl OnEvent for BumperRowTwo {}
 impl BumperRowTwo {
 	pub fn new(ctx: &mut Context) -> Self {
-		BumperRowTwo(Row::center(40.0), Button::new(ctx), ButtonTwo::new(ctx), ButtonThree::new(ctx))
+		BumperRowTwo(Row::center(40.0), ButtonColor::new(ctx), ButtonColor2::new(ctx), ButtonColor3::new(ctx))
 	}
 }
 
@@ -268,10 +353,17 @@ impl OnEvent for Canvas {
 				println!("drawing is enabled {}", self.2);
 			}
 			if self.2 == true {
+				//we need to be able to get the Shapeype without altering size values.
+				let size = match *ctx.state().get_or_default::<ShapeSize>() {
+					ShapeSize::Twenty => 20.0,
+					ShapeSize::Fourty => 40.0,
+					ShapeSize::Sixty => 60.0,
+				};
+
 				let shape = match *ctx.state().get_or_default::<Brush>() {
-					Brush::Ellipse => ShapeType::Ellipse(0.0, (20.0, 20.0), 0.0),
-					Brush::Rectangle => ShapeType::Rectangle(0.0, (20.0, 20.0), 0.0),
-					Brush::RoundedRectangle => ShapeType::RoundedRectangle(0.0, (20.0, 20.0), 20.0, 0.0),
+					Brush::Ellipse => ShapeType::Ellipse(0.0, (size, size), 0.0),
+					Brush::Rectangle => ShapeType::Rectangle(0.0, (size, size), 0.0),
+					Brush::RoundedRectangle => ShapeType::RoundedRectangle(0.0, (size, size), 20.0, 0.0),
 				};
 				self.0.0.push(*my_position);
 				if self.4 == false {
@@ -396,4 +488,12 @@ pub enum Brush {
 	Ellipse,
 	Rectangle,
 	RoundedRectangle,
+}
+
+#[derive(Default, Debug)]
+pub enum ShapeSize {
+	#[default]
+	Twenty,
+	Fourty,
+	Sixty,
 }
