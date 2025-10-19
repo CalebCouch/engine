@@ -92,7 +92,37 @@ impl Asteroid {
 		Asteroid(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Ellipse(5.0, (55.0, 55.0), 0.0),
+				shape: ShapeType::Ellipse(5.0, (120.0, 120.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+		)
+	}
+
+	pub fn big(ctx: &mut Context) -> Self {
+		Asteroid(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Ellipse(5.0, (80.0, 80.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+		)
+	}
+
+	pub fn medium(ctx: &mut Context) -> Self {
+		Asteroid(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Ellipse(5.0, (60.0, 60.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+		)
+	}
+
+	pub fn small(ctx: &mut Context) -> Self {
+		Asteroid(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Ellipse(5.0, (40.0, 40.0), 0.0),
 				color: Color::from_hex("#000000", 255),
 			},
 		)
@@ -106,16 +136,17 @@ impl OnEvent for Canvas {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
 			//since the tickevent is automatic we don't need to do any special loops and whatnot, so we just need to put the asteroid movement updates right here.
-			//create grid maybe like we did with space invaders?
+			//use canvaslayout for positioning and then we can most likely index on the offsets?
 		}
 		true
 	}
 }
+
 impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
-			CanvasLayout(vec![(20.0, 20.0)]),
-			vec![Asteroid::new(ctx)],
+			CanvasLayout(vec![(300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ (20.0, 270.0)]),
+			vec![Asteroid::big(ctx), Asteroid::medium(ctx), /*Asteroid::small(ctx),*/ Asteroid::small(ctx), /*Asteroid::medium(ctx),*/ Asteroid::medium(ctx)],
 			Ship::new(ctx),
 		)
     }
@@ -174,3 +205,5 @@ impl Layout for CanvasLayout {
         ).collect()
     }
 }
+
+
