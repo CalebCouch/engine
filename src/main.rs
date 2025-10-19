@@ -290,8 +290,8 @@ impl SecondPage {
 	}
 }*/
 use pelican_ui::{maverick_start, MaverickOS, PelicanEngine};
-mod drawing;
-pelican_ui::start!(drawing::TestApp);
+mod asteroids;
+pelican_ui::start!(asteroids::TestApp);
 fn main() {
     maverick_main();
 }

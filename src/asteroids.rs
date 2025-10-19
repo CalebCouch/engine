@@ -70,51 +70,43 @@ impl Event for NavEvent{
 }
 
 #[derive(Debug, Component)]
-pub struct Bumper(Stack, Shape, Shape);
-impl OnEvent for Bumper {
-fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
-		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
-			if *my_state == MouseState::Pressed {
-				println!("it worked");
-			}
-			ctx.state().get::<Bumper>().set::<Canvas>();
-		}
-		true
-	}
-}
-impl Bumper {
-	fn new(ctx: &mut Context) -> Self {
-		Bumper(
+pub struct Ship(Stack, Shape);
+impl OnEvent for Ship {}
+impl Ship {
+	pub fn new(ctx: &mut Context) -> Self {
+		Ship(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Rectangle(0.0, (480.0, 55.0), 0.0),
+				shape: ShapeType::Rectangle(5.0, (55.0, 55.0), 0.0),
 				color: Color::from_hex("#000000", 255),
-			},
-			Shape{
-				shape: ShapeType::Rectangle(0.0, (55.0, 55.0), 0.0),
-				color: Color::from_hex("#0000FF", 255),
 			},
 		)
 	}
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Vec<Shape>, #[skip] bool);
+pub struct Asteroid(Stack, Shape);
+impl OnEvent for Asteroid {}
+impl Asteroid {
+	pub fn new(ctx: &mut Context) -> Self {
+		Asteroid(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Ellipse(5.0, (55.0, 55.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+		)
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct Canvas(CanvasLayout, Vec<Asteroid>, Ship);
 impl OnEvent for Canvas {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
-			println!("{:?}", my_position);
-			println!("{:?}", my_state);
-			if *my_state == MouseState::Pressed {
-				self.2 = !self.2;
-				println!("drawing is enabled {}", self.2);
-			}
-			if self.2 == true {
-				self.0.0.push(*my_position);
-				self.1.push(Shape{shape: ShapeType::Ellipse(0.0, (50.0, 50.0), 0.0), color: Color::from_hex("#FFD700", 255),})
-			}
+			//since the tickevent is automatic we don't need to do any special loops and whatnot, so we just need to put the asteroid movement updates right here.
+			//create grid maybe like we did with space invaders?
 		}
 		true
 	}
@@ -122,9 +114,9 @@ impl OnEvent for Canvas {
 impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
-			CanvasLayout(vec![]),
-			vec![],
-			false
+			CanvasLayout(vec![(20.0, 20.0)]),
+			vec![Asteroid::new(ctx)],
+			Ship::new(ctx),
 		)
     }
 }
@@ -142,7 +134,7 @@ impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
 		//let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonStyle::Primary, ButtonState::Default, Offset::Center, |ctx: &mut Context| {}, Some("Hello".to_string()));
 		//let bumper = Bumper::single_button(ctx, button);
-		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)), Box::new(Bumper::new(ctx))];
+		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)),];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
 		FirstScreen(Stack::default(), Page::new(Some(header), content, None))
