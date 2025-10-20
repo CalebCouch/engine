@@ -151,7 +151,7 @@ impl Canvas {
 }
 //display ellipse when mouse is clicked
 #[derive(Debug, Component)]
-pub struct FirstScreen(Stack, Page, #[skip] (f32, f32));
+pub struct FirstScreen(Stack, Page, #[skip] f32);
 impl OnEvent for FirstScreen {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -160,10 +160,8 @@ impl OnEvent for FirstScreen {
 			//use canvaslayout for positioning and then we can most likely index on the offsets?
 			//we need to have some way to alter ALL the index of the CanvasLayout
 			println!("{:?}", self.1.content().find_at::<Canvas>(0).unwrap().0.0[1]);
-			//how do we get this into a field AND index on that field lol. this should NOT be this hard lmao
-			self.2 = self.1.content().find_at::<Canvas>(0).unwrap().0.0[1];
+			//self.2 = self.1.content().find_at::<Canvas>(0).unwrap().0.0[1];
 			self.2.0 += 20.0;
-			println!("{}", self.2.0)
 		}
 		true
 	}
@@ -181,7 +179,7 @@ impl FirstScreen {
 		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)),];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
-		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0))
+		FirstScreen(Stack::default(), Page::new(Some(header), content, None))
     }
 }
 
