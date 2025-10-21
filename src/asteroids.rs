@@ -153,17 +153,25 @@ impl Canvas {
 #[derive(Debug, Component)]
 pub struct FirstScreen(Stack, Page, #[skip] (f32, f32));
 impl OnEvent for FirstScreen {
-	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
-			//since the tickevent is automatic we don't need to do any special loops and whatnot, so we just need to put the asteroid movement updates right here.
 			//use canvaslayout for positioning and then we can most likely index on the offsets?
 			//we need to have some way to alter ALL the index of the CanvasLayout
-			println!("{:?}", self.1.content().find_at::<Canvas>(0).unwrap().0.0[1]);
 			//how do we get this into a field AND index on that field lol. this should NOT be this hard lmao
-			self.2 = self.1.content().find_at::<Canvas>(0).unwrap().0.0[1];
-			self.2.0 += 20.0;
-			println!("{}", self.2.0)
+			self.2 = (0.5, 0.5);
+			let mut a = self.1.content().find_at::<Canvas>(0).unwrap().0.0[0];
+			let mut b = self.1.content().find_at::<Canvas>(0).unwrap().0.0[1];
+			let mut c = self.1.content().find_at::<Canvas>(0).unwrap().0.0[2];
+			let mut d = self.1.content().find_at::<Canvas>(0).unwrap().0.0[3];
+			let asteroid0 = (a.0 - self.2.0, a.1 - self.2.1);
+			let asteroid1 = (b.0 + self.2.0, b.1 + self.2.1);
+			let asteroid2 = (c.0 + self.2.0, c.1 + self.2.1);
+			let asteroid3 = (d.0 + self.2.0, d.1 + self.2.1);
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = asteroid0;
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = asteroid1;
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[2] = asteroid2;
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] = asteroid3;
 		}
 		true
 	}
