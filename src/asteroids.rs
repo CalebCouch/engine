@@ -176,13 +176,15 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			if self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] > (1000.0, 1000.0) {
 				self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] = (260.0, 200.0);
 			}
+			println!("{:?}", self.1.content().find_at::<Canvas>(0).unwrap().1);
 
 		} else if let Some(KeyboardEvent{key: my_key, state: my_state}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
 			//COMPLETED: make code cleaner and less hardcoded
+			//COMPLETED: add ship movement
+			//create a way to automatically generate asteroids. definetely going to be using .push()
 			//add asteroid collision and splitting into smaller asteroids
-			//add ship movement
 			//make ship shoot
 			//replace shapes with sprites
 			//BUGS: any named key double presses
@@ -205,11 +207,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 				self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 = left;
 			}
 			//let asteroid = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].1 + self.2.1);
-			//maybe we could use .map and do the index thingy
-			//maybe use let match statement instead?
 			//maybe use filter to create certain conditions
-			//we need a way to index all the elements of a vec. we can't use a for loop because it breaks the program. i might have a really cheesy way of doing this but we'll see
-			//we could just make a variable that equals a vec that we could store each individual slice in, but that is still kind of inefficient
 		}
 		true
 	}
@@ -229,6 +227,15 @@ impl FirstScreen {
 		let header = Header::home(ctx, "Canvas", None);
 		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0))
     }
+	pub fn shoot(&mut self, ctx: &mut Context) {
+		//how to make ship shoot? we could push a new offset and shape above the position of our ship? we would have to avoid hardcoding our ship's position so we'll need some sort of variable or we quite literally could just index into CanvasLayout lol
+		//issues: we can't push properly cuz we can't self on CanvasLayout
+		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
+		let offset = &mut canvas.0.0;
+		let shape = &mut canvas.1;
+		offset.push(offset[4]);
+		//shape.push(shape.)
+	}
 }
 
 #[derive(Debug, Component)]
