@@ -149,12 +149,40 @@ impl Canvas {
 		)
     }
 }
+
 //display ellipse when mouse is clicked
 #[derive(Debug, Component)]
 pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32));
 impl OnEvent for FirstScreen {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+			self.2 = (2.0, 2.0);
+			for bruh in &mut self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..4] {
+				println!("{:?}", bruh);
+				let asteroids = (bruh.0 + self.2.0, bruh.1 + self.2.0);
+				self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = asteroid0;
+				self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = asteroid0;
+				self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = asteroid0;
+				self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = asteroid0;
+			}
+			/*let asteroids = match self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..4] {
+				self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] => {
+					
+				}
+			};*/
+			let asteroid0 = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[0].0 - self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[0].1 - self.2.1);
+			let asteroid1 = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[1].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[1].1 + self.2.1);
+			let asteroid2 = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[2].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[2].1 + self.2.1);
+			let asteroid3 = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[3].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[3].1 + self.2.1);
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = asteroid0;
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = asteroid1;
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[2] = asteroid2;
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] = asteroid3;
+			/*self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = (20.0, 20.0);
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = (200.0, 20.0);
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = (260.0, 200.0);
+			//}*/
+
 		} else if let Some(KeyboardEvent{key: my_key, state: my_state}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
@@ -162,8 +190,8 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			//add asteroid collision and splitting into smaller asteroids
 			//add ship movement
 			//make ship shoot
-			//current BUGS: any named key double presses
-			self.2 = (10.0, 10.0);
+			//replace shapes with sprites
+			//BUGS: any named key double presses
 			self.3 = (12.0, 12.0);
 			if Key::Named(NamedKey::ArrowUp) == *my_key {
 				let up = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 - self.3.1);
@@ -185,20 +213,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			//let asteroid = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].1 + self.2.1);
 			//maybe we could use .map and do the index thingy
 			//maybe use let match statement instead?
-			let asteroid0 = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[0].0 - self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[0].1 - self.2.1);
-			let asteroid1 = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[1].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[1].1 + self.2.1);
-			let asteroid2 = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[2].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[2].1 + self.2.1);
-			let asteroid3 = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[3].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[3].1 + self.2.1);
-			self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = asteroid0;
-			self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = asteroid1;
-			self.1.content().find_at::<Canvas>(0).unwrap().0.0[2] = asteroid2;
-			self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] = asteroid3;
-			let tuple: Vec<(f32, f32)> = vec![(1000.0, 1000.0)];
-			if self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3] > tuple {
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = (20.0, 20.0);
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = (200.0, 20.0);
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = (260.0, 200.0);
-			}
+			//maybe use filter to create certain conditions
 			//we need a way to index all the elements of a vec. we can't use a for loop because it breaks the program. i might have a really cheesy way of doing this but we'll see
 			//we could just make a variable that equals a vec that we could store each individual slice in, but that is still kind of inefficient
 		}
