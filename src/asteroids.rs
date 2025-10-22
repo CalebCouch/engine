@@ -176,7 +176,6 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			if self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] > (1000.0, 1000.0) {
 				self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] = (260.0, 200.0);
 			}
-			println!("{:?}", self.1.content().find_at::<Canvas>(0).unwrap().1);
 
 		} else if let Some(KeyboardEvent{key: my_key, state: my_state}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
@@ -189,6 +188,9 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			//replace shapes with sprites
 			//BUGS: any named key double presses
 			self.3 = (12.0, 12.0);
+			if Key::Named(NamedKey::Space) == *my_key {
+				self.shoot(ctx);
+			}
 			if Key::Named(NamedKey::ArrowUp) == *my_key {
 				let up = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 - self.3.1);
 				self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 = up;
@@ -230,11 +232,19 @@ impl FirstScreen {
 	pub fn shoot(&mut self, ctx: &mut Context) {
 		//how to make ship shoot? we could push a new offset and shape above the position of our ship? we would have to avoid hardcoding our ship's position so we'll need some sort of variable or we quite literally could just index into CanvasLayout lol
 		//issues: we can't push properly cuz we can't self on CanvasLayout
+		let add: f32 = 20.0;
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
 		offset.push(offset[4]);
-		//shape.push(shape.)
+		shape.push(Asteroid::small(ctx));
+		loop {
+			let shoot = (offset[5].1 + add);
+		}
+		//offset[5].1 = shoot;
+		//make sure that bullets spawn a little above the ship's front lol
+		//make sure the bullets move
+		
 	}
 }
 
