@@ -237,19 +237,16 @@ impl FirstScreen {
 	pub fn shoot(&mut self, ctx: &mut Context) {
 		//how to make ship shoot? we could push a new offset and shape above the position of our ship? we would have to avoid hardcoding our ship's position so we'll need some sort of variable or we quite literally could just index into CanvasLayout lol
 		//issues: we can't push properly cuz we can't self on CanvasLayout
-		let add: f32 = 200.0;
+		self.2 = (20.0, 20.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
-		offset.push(offset[4]);
+		let ship_coord = offset[4];
+		offset.push((30.0, 30.0));
 		shape.push(Asteroid::small(ctx));
+		offset[5] = ship_coord;
 		//make sure that bullets spawn a little above the ship's front lol
 		//make sure the bullets move
-		for bruh in &mut offset[0..5] {
-			println!("{:?}", bruh);
-			let asteroids = (bruh.0 + add, bruh.1 + add);
-			*bruh = asteroids;
-		}
 	}
 }
 
