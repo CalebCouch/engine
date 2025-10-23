@@ -155,29 +155,29 @@ impl Canvas {
 pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32));
 impl OnEvent for FirstScreen {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
-		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-			self.2 = (4.0, 4.0);
-			let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
-			let slices = &mut canvas.0.0;
-			for bruh in &mut slices[0..4] {
-				println!("{:?}", bruh);
-				let asteroids = (bruh.0 + self.2.0, bruh.1 + self.2.0);
-				*bruh = asteroids;
-			}
-			if self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] > (1000.0, 1000.0) {
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = (20.0, 20.0);
-			}
-			if self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] > (1000.0, 1000.0) {
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = (200.0, 20.0);
-			}
-			if self.1.content().find_at::<Canvas>(0).unwrap().0.0[2] > (1000.0, 1000.0) {
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[2] = (260.0, 200.0);
-			}
-			if self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] > (1000.0, 1000.0) {
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] = (260.0, 200.0);
-			}
+	if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+		self.2 = (4.0, 4.0);
+		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
+		let slices = &mut canvas.0.0;
+		for bruh in &mut slices[0..4] {
+			println!("{:?}", bruh);
+			let asteroids = (bruh.0 + self.2.0, bruh.1 + self.2.0);
+			*bruh = asteroids;
+		}
+		if self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] > (1000.0, 1000.0) {
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = (20.0, 20.0);
+		}
+		if self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] > (1000.0, 1000.0) {
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = (200.0, 20.0);
+		}
+		if self.1.content().find_at::<Canvas>(0).unwrap().0.0[2] > (1000.0, 1000.0) {
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[2] = (260.0, 200.0);
+		}
+		if self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] > (1000.0, 1000.0) {
+			self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] = (260.0, 200.0);
+		}
 
-		} else if let Some(KeyboardEvent{key: my_key, state: my_state}) = event.downcast_ref::<KeyboardEvent>() {
+	} else if let Some(KeyboardEvent{key: my_key, state: my_state}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
 			//COMPLETED: make code cleaner and less hardcoded
@@ -188,25 +188,30 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			//replace shapes with sprites
 			//BUGS: any named key double presses
 			self.3 = (12.0, 12.0);
-			if Key::Named(NamedKey::Space) == *my_key {
-				self.shoot(ctx);
-			}
-			if Key::Named(NamedKey::ArrowUp) == *my_key {
-				let up = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 - self.3.1);
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 = up;
-				println!("{}", self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1);
-			}
-			if Key::Named(NamedKey::ArrowDown) == *my_key {
-				let down = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 + self.3.1);
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 = down;
-			}
-			if Key::Named(NamedKey::ArrowRight) == *my_key {
-				let right = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 + self.3.0);
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 = right;
-			}
-			if Key::Named(NamedKey::ArrowLeft) == *my_key {
-				let left = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 - self.3.0);
-				self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 = left;
+			match my_key {
+				Key::Named(NamedKey::Space) => {
+					self.shoot(ctx);
+				},
+				Key::Named(NamedKey::ArrowUp) => {
+					let up = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 - self.3.1);
+					self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 = up;
+					println!("{}", self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1);
+				},
+				Key::Named(NamedKey::ArrowDown) => {
+					let down = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 + self.3.1);
+					self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 = down;
+				},
+				Key::Named(NamedKey::ArrowRight) => {
+					let right = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 + self.3.0);
+					self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 = right;
+				},
+				Key::Named(NamedKey::ArrowLeft) => {
+					let left = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 - self.3.0);
+					self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 = left;
+				}
+				_ => {
+					println!("hey");
+				}
 			}
 			//let asteroid = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].1 + self.2.1);
 			//maybe use filter to create certain conditions
@@ -232,19 +237,19 @@ impl FirstScreen {
 	pub fn shoot(&mut self, ctx: &mut Context) {
 		//how to make ship shoot? we could push a new offset and shape above the position of our ship? we would have to avoid hardcoding our ship's position so we'll need some sort of variable or we quite literally could just index into CanvasLayout lol
 		//issues: we can't push properly cuz we can't self on CanvasLayout
-		let add: f32 = 20.0;
+		let add: f32 = 200.0;
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
 		offset.push(offset[4]);
 		shape.push(Asteroid::small(ctx));
-		loop {
-			let shoot = (offset[5].1 + add);
-		}
-		//offset[5].1 = shoot;
 		//make sure that bullets spawn a little above the ship's front lol
 		//make sure the bullets move
-		
+		for bruh in &mut offset[0..5] {
+			println!("{:?}", bruh);
+			let asteroids = (bruh.0 + add, bruh.1 + add);
+			*bruh = asteroids;
+		}
 	}
 }
 
