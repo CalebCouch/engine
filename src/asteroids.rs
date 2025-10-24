@@ -319,7 +319,8 @@ impl FirstScreen {
 		self.2 = (20.0, 20.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
-		let shape = &mut canvas.1;
+		let shape = &mut canvas.1[3].1.shape;
+		println!("{:?}", shape);
 		//delete all of this code and revisit it, it clearly isn't working.
 		offset[5] = offset[4];
 			let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
@@ -327,8 +328,15 @@ impl FirstScreen {
 		//make sure that bullets spawn a little above the ship's front lol
 		//make sure the bullets move
 	}
-	pub fn collision(self, ctx: &mut Context) {
-		
+	pub fn collision(&mut self, ctx: &mut Context) {
+		//get the radius of asteroids/ships. add the width and height to the offset to get the center. check if ship.center() - asteroid.center() is within your radius
+		let test: (f32, f32) = (260.0, 200.0);
+		let test: (f32, f32) = (20.0, 270.0);
+		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
+		let offset = &mut canvas.0.0;
+		let shape = &mut canvas.1;
+		let asteroid_radius = (offset[3].0 + test.0, offset[3].1 + test.1);
+		let ship_radius = (offset[4].0 + test.0, offset[4].1 + test.1);
 	}
 }
 
