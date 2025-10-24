@@ -77,14 +77,30 @@ impl ScoreBoard {
 		ScoreBoard(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Rectangle(5.0, (55.0, 55.0), 0.0),
-				color: Color::from_hex("#000000", 255),
+				shape: ShapeType::Rectangle(0.0, (80.0, 55.0), 0.0),
+				color: Color::from_hex("#FFFFFF", 255),
 			},
 			Text::new(
 				ctx,
-				"SCORE",
+				"SCORE:",
 				TextStyle::Primary,
-				50.0,
+				20.0,
+				Align::Left,
+			)
+		)
+	}
+	pub fn lives(ctx: &mut Context) -> Self {
+		ScoreBoard(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Rectangle(0.0, (80.0, 55.0), 0.0),
+				color: Color::from_hex("#FFFFFF", 255),
+			},
+			Text::new(
+				ctx,
+				"LIVES:",
+				TextStyle::Primary,
+				20.0,
 				Align::Left,
 			)
 		)
@@ -92,7 +108,21 @@ impl ScoreBoard {
 }
 
 #[derive(Debug, Component)]
-pub struct Bumper(Stack, Shape, ScoreBoard);
+pub struct BumperRow(Row, ScoreBoard, ScoreBoard);
+impl OnEvent for BumperRow {}
+impl BumperRow {
+	pub fn new(ctx: &mut Context) -> Self {
+		BumperRow(
+			Row::center(10.0),
+			ScoreBoard::new(ctx),
+			ScoreBoard::lives(ctx),
+		)
+	}
+}
+
+
+#[derive(Debug, Component)]
+pub struct Bumper(Stack, Shape, BumperRow);
 impl OnEvent for Bumper {}
 impl Bumper {
 	pub fn new(ctx: &mut Context) -> Self {
@@ -102,7 +132,7 @@ impl Bumper {
 				shape: ShapeType::Rectangle(0.0, (380.0, 55.0), 0.0),
 				color: Color::from_hex("#000000", 255),
 			},
-			ScoreBoard::new(ctx),
+			BumperRow::new(ctx),
 		)
 	}
 }
@@ -278,7 +308,7 @@ impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
 		//let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonStyle::Primary, ButtonState::Default, Offset::Center, |ctx: &mut Context| {}, Some("Hello".to_string()));
 		//let bumper = Bumper::single_button(ctx, button);
-		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)), Box::new(Canvas::new(ctx))];
+		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)), Box::new(Bumper::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
 		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0), false)
@@ -296,6 +326,9 @@ impl FirstScreen {
 			offset[5] = shoot;
 		//make sure that bullets spawn a little above the ship's front lol
 		//make sure the bullets move
+	}
+	pub fn collision(self, ctx: &mut Context) {
+		
 	}
 }
 
