@@ -70,6 +70,45 @@ impl Event for NavEvent{
 }
 
 #[derive(Debug, Component)]
+pub struct ScoreBoard(Stack, Shape, Text);
+impl OnEvent for ScoreBoard {}
+impl ScoreBoard {
+	pub fn new(ctx: &mut Context) -> Self {
+		ScoreBoard(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Rectangle(5.0, (55.0, 55.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+			Text::new(
+				ctx,
+				"SCORE",
+				TextStyle::Primary,
+				50.0,
+				Align::Left,
+			)
+		)
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct Bumper(Stack, Shape, ScoreBoard);
+impl OnEvent for Bumper {}
+impl Bumper {
+	pub fn new(ctx: &mut Context) -> Self {
+		Bumper(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Rectangle(0.0, (380.0, 55.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+			ScoreBoard::new(ctx),
+		)
+	}
+}
+
+
+#[derive(Debug, Component)]
 pub struct Ship(Stack, Shape);
 impl OnEvent for Ship {}
 impl Ship {
@@ -158,27 +197,29 @@ impl OnEvent for FirstScreen {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		self.2 = (4.0, 4.0);
-		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
-		let slices = &mut canvas.0.0;
+		let offset = self.1.content().find_at::<Canvas>(0).unwrap();
+		let slices = &mut offset.0.0;
 		for bruh in &mut slices[0..4] {
 			println!("{:?}", bruh);
 			let asteroids = (bruh.0 + self.2.0, bruh.1 + self.2.0);
 			*bruh = asteroids;
 		}
-		if self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] > (1000.0, 1000.0) {
-			self.1.content().find_at::<Canvas>(0).unwrap().0.0[0] = (20.0, 20.0);
+		if slices[0] > (1000.0, 1000.0) {
+			slices[0] = (20.0, 20.0);
 		}
-		if self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] > (1000.0, 1000.0) {
-			self.1.content().find_at::<Canvas>(0).unwrap().0.0[1] = (200.0, 20.0);
+		if slices[1] > (1000.0, 1000.0) {
+			slices[1] = (200.0, 20.0);
 		}
-		if self.1.content().find_at::<Canvas>(0).unwrap().0.0[2] > (1000.0, 1000.0) {
-			self.1.content().find_at::<Canvas>(0).unwrap().0.0[2] = (260.0, 200.0);
+		if slices[2] > (1000.0, 1000.0) {
+			slices[2] = (260.0, 200.0);
 		}
-		if self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] > (1000.0, 1000.0) {
-			self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] = (260.0, 200.0);
+		if slices[3] > (1000.0, 1000.0) {
+			slices[3] = (260.0, 200.0);
 		}
-		if self.4 == true {
-			self.shoot(ctx);
+		for test in 0..10 {
+			if self.4 == true {
+				self.shoot(ctx);
+			}
 		}
 
 	} else if let Some(KeyboardEvent{key: my_key, state: my_state}) = event.downcast_ref::<KeyboardEvent>() {
@@ -186,35 +227,39 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
 			//COMPLETED: make code cleaner and less hardcoded
 			//COMPLETED: add ship movement
+			//HALFWAY COMPLETED: create a bumper with the score and lives
+			//HALFWAY COMPLETED: make ship shoot
 			//create a way to automatically generate asteroids. definetely going to be using .push()
 			//add asteroid collision and splitting into smaller asteroids
-			//make ship shoot
 			//replace shapes with sprites
 			//BUGS: any named key double presses
+			//create death and respawn + update score board
 			self.3 = (12.0, 12.0);
+			let offset = self.1.content().find_at::<Canvas>(0).unwrap();
+			let slices = &mut offset.0.0;
 			match my_key {
 				Key::Named(NamedKey::Space) => {
 					self.4 = true;
 				},
 				Key::Named(NamedKey::ArrowUp) => {
-					let up = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 - self.3.1);
-					self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 = up;
+					let up = (slices[4].1 - self.3.1);
+					slices[4].1 = up;
 					println!("{}", self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1);
 				},
 				Key::Named(NamedKey::ArrowDown) => {
-					let down = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 + self.3.1);
-					self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 = down;
+					let down = (slices[4].1 + self.3.1);
+					slices[4].1 = down;
 				},
 				Key::Named(NamedKey::ArrowRight) => {
-					let right = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 + self.3.0);
-					self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 = right;
+					let right = (slices[4].0 + self.3.0);
+					slices[4].0 = right;
 				},
 				Key::Named(NamedKey::ArrowLeft) => {
-					let left = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 - self.3.0);
-					self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].0 = left;
+					let left = (slices[4].0 - self.3.0);
+					slices[4].0 = left;
 				}
 				_ => {
-					println!("hey");
+					println!("wrong key press?");
 				}
 			}
 			//let asteroid = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].1 + self.2.1);
@@ -233,7 +278,7 @@ impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
 		//let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonStyle::Primary, ButtonState::Default, Offset::Center, |ctx: &mut Context| {}, Some("Hello".to_string()));
 		//let bumper = Bumper::single_button(ctx, button);
-		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)),];
+		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)), Box::new(Canvas::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
 		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0), false)
