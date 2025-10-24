@@ -130,7 +130,7 @@ impl Asteroid {
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Vec<Asteroid>, Ship);
+pub struct Canvas(CanvasLayout, Vec<Asteroid>, Ship, Asteroid);
 impl OnEvent for Canvas {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -143,16 +143,17 @@ impl OnEvent for Canvas {
 impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
-			CanvasLayout(vec![(300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ (20.0, 270.0)]),
+			CanvasLayout(vec![(300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ (20.0, 270.0), (-200.0, -200.0)]),
 			vec![Asteroid::big(ctx), Asteroid::medium(ctx), /*Asteroid::small(ctx),*/ Asteroid::small(ctx), /*Asteroid::medium(ctx),*/ Asteroid::medium(ctx)],
 			Ship::new(ctx),
+			Asteroid::small(ctx),
 		)
     }
 }
 
 //display ellipse when mouse is clicked
 #[derive(Debug, Component)]
-pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32));
+pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32), #[skip] bool);
 impl OnEvent for FirstScreen {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -176,6 +177,9 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] > (1000.0, 1000.0) {
 			self.1.content().find_at::<Canvas>(0).unwrap().0.0[3] = (260.0, 200.0);
 		}
+		if self.4 == true {
+			self.shoot(ctx);
+		}
 
 	} else if let Some(KeyboardEvent{key: my_key, state: my_state}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
@@ -190,7 +194,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			self.3 = (12.0, 12.0);
 			match my_key {
 				Key::Named(NamedKey::Space) => {
-					self.shoot(ctx);
+					self.4 = true;
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					let up = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1 - self.3.1);
@@ -232,7 +236,7 @@ impl FirstScreen {
 		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)),];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
-		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0))
+		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0), false)
     }
 	pub fn shoot(&mut self, ctx: &mut Context) {
 		//how to make ship shoot? we could push a new offset and shape above the position of our ship? we would have to avoid hardcoding our ship's position so we'll need some sort of variable or we quite literally could just index into CanvasLayout lol
@@ -241,10 +245,10 @@ impl FirstScreen {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
-		let ship_coord = offset[4];
-		offset.push((30.0, 30.0));
-		shape.push(Asteroid::small(ctx));
-		offset[5] = ship_coord;
+		//delete all of this code and revisit it, it clearly isn't working.
+		offset[5] = offset[4];
+			let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
+			offset[5] = shoot;
 		//make sure that bullets spawn a little above the ship's front lol
 		//make sure the bullets move
 	}
