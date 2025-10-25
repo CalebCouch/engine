@@ -250,6 +250,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			if self.4 == true {
 				self.shoot(ctx);
 				self.collision(ctx);
+				println!("{:?}", self.get_size(ctx));
 			}
 		}
 
@@ -321,7 +322,6 @@ impl FirstScreen {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1[3].1.shape;
-		println!("{:?}", shape);
 		//delete all of this code and revisit it, it clearly isn't working.
 		offset[5] = offset[4];
 			let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
@@ -329,6 +329,26 @@ impl FirstScreen {
 		//make sure that bullets spawn a little above the ship's front lol
 		//make sure the bullets move
 	}
+
+	pub fn get_size(&mut self, ctx: &mut Context) -> (f32, f32) {
+		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
+		let offset = &mut canvas.0.0;
+		let shape = &mut canvas.1;
+		for bruh in &mut shape[0..4] {
+			match bruh.1.shape {
+				ShapeType::Ellipse(stroke_width, (width, height), rotation) => {
+					return (width, height);
+				},
+				ShapeType::Rectangle(stroke_width, (width, height), rotation) => {
+					return (width, height);
+				},
+				ShapeType::RoundedRectangle(stroke_width, (width, height), corner_radius, rotation) => {
+					return (width, height);
+				},
+			}
+		}
+	}
+
 	pub fn collision(&mut self, ctx: &mut Context) {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
@@ -351,8 +371,9 @@ impl FirstScreen {
 		let distance_y = (s_center.1 - a_center.1).abs();
 		//need to somehow make this a singular f32...w
 		if distance_x < ship_radius.max(asteroid_radius) {
-		} else if distance_y < ship_radius.max(asteroid_radius) {
-			println!("it worked");
+			if distance_y < ship_radius.max(asteroid_radius) {
+				println!("it worked");
+			}
 		}
 		//new instructions: ir collision.abs() < ship.radius().max(asteroid.radius()) {collision logic}}
 		//get the radius of asteroids/ships. add the width and height to the offset to get the center. check if ship.center() - asteroid.center() is within your radius (the ship's)
