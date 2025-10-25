@@ -359,21 +359,20 @@ impl FirstScreen {
 		//TODO:
 		//extract sizes from our sizes variable.
 		//make sure we don't hardcode our asteroid sizes and clean that up. maybe we can use enumerate again
-		//fix the collision logic
-		
-		for bruh in &mut sizes[0..4] {
-			println!("{:?}", bruh2);
+		//fix the collision logic at the bottom
+		//create enumerator to get index
+		for (index, (asteroid_height, asteroid_width)) in sizes.iter().enumerate() {
 			//radius of ship and asteroid
 			let ship_radius: f32 = 27.5;
-			let s_height_width: (f32, f32) = (27.5, 27.5);
-			let s_center = (offset[4].0 + s_height_width.0, offset[4].1 + s_height_width.1);
+			let ship_size: (f32, f32) = (27.5, 27.5);
+			let ship_center = (offset[4].0 + ship_size.0, offset[4].1 + ship_size.1);
 
 			//getting the center of asteroid and ship
-			let a_center = (offset[3].0 + a_height_width.0, offset[3].1 + a_height_width.1);
+			let asteroid_center = (offset[index].0 + asteroid_height / 2.0, offset[index].1 + asteroid_width / 2.0);
 
 			//getting the distance from eachother's centers
-			let distance_x = (s_center.0 - a_center.0).abs();
-			let distance_y = (s_center.1 - a_center.1).abs();
+			let distance_x = (ship_center.0 - a_center.0).abs();
+			let distance_y = (ship_center.1 - a_center.1).abs();
 
 			//need to somehow make this a singular f32...w
 			if distance_x < ship_radius.max(asteroid_radius) {
