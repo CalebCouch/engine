@@ -146,7 +146,7 @@ impl Ship {
 		Ship(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Rectangle(5.0, (55.0, 55.0), 0.0),
+				shape: ShapeType::Ellipse(5.0, (55.0, 55.0), 0.0),
 				color: Color::from_hex("#000000", 255),
 			},
 		)
@@ -249,6 +249,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		for test in 0..10 {
 			if self.4 == true {
 				self.shoot(ctx);
+				self.collision(ctx);
 			}
 		}
 
@@ -330,13 +331,17 @@ impl FirstScreen {
 	}
 	pub fn collision(&mut self, ctx: &mut Context) {
 		//get the radius of asteroids/ships. add the width and height to the offset to get the center. check if ship.center() - asteroid.center() is within your radius
-		let test: (f32, f32) = (260.0, 200.0);
-		let test: (f32, f32) = (20.0, 270.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
-		let asteroid_radius = (offset[3].0 + test.0, offset[3].1 + test.1);
-		let ship_radius = (offset[4].0 + test.0, offset[4].1 + test.1);
+		let a_values: (f32, f32) = (30.0, 30.0);
+		let s_values: (f32, f32) = (27.5, 27.5);
+		let a_center = (offset[3].0 + a_values.0, offset[3].1 + a_values.1);
+		let s_center = (offset[4].0 + s_values.0, offset[4].1 + s_values.1);
+		let a_center = a_add.0 - s_add.0;
+		let s_center = a_add.1 - a_add.1;
+		println!("asteroid radius {}", a_radius);
+		println!("ship radius {}", s_radius);
 	}
 }
 
