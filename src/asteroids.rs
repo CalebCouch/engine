@@ -229,11 +229,11 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		self.2 = (4.0, 4.0);
 		let offset = self.1.content().find_at::<Canvas>(0).unwrap();
 		let slices = &mut offset.0.0;
-		for bruh in &mut slices[0..4] {
-			println!("{:?}", bruh);
+		/*for bruh in &mut slices[0..4] {
+			//println!("{:?}", bruh);
 			let asteroids = (bruh.0 + self.2.0, bruh.1 + self.2.0);
 			*bruh = asteroids;
-		}
+		}*/
 		if slices[0] > (1000.0, 1000.0) {
 			slices[0] = (20.0, 20.0);
 		}
@@ -333,15 +333,25 @@ impl FirstScreen {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
+
+		//radius of ship and asteroid
+		let ship_radius: f32 = 27.5;
+		let asteroid_radius: f32 = 30.0;
+
+		//height and width of asteroid and ship (already halved)
 		let a_height_width: (f32, f32) = (30.0, 30.0);
 		let s_height_width: (f32, f32) = (27.5, 27.5);
-		let a_center = (offset[3].0 + a_values.0, offset[3].1 + a_values.1);
-		let s_center = (offset[4].0 + s_values.0, offset[4].1 + s_values.1);
-		let collision = (s_center.0 - a_center.1, s_center.1 - a_center.1);
-		println!("asteroid radius {:?}", a_center);
-		println!("ship radius {:?}", s_center);
-		println!("this is collision {:?}", collision);
-		if collision.abs() < s_values.0.max(a_values.0) {
+
+		//getting the center of asteroid and ship
+		let a_center = (offset[3].0 + a_height_width.0, offset[3].1 + a_height_width.1);
+		let s_center = (offset[4].0 + s_height_width.0, offset[4].1 + s_height_width.1);
+
+		//getting the distance from eachother's centers
+		let distance_x = (s_center.0 - a_center.0).abs();
+		let distance_y = (s_center.1 - a_center.1).abs();
+		//need to somehow make this a singular f32...w
+		if distance_x < ship_radius.max(asteroid_radius) {
+		} else if distance_y < ship_radius.max(asteroid_radius) {
 			println!("it worked");
 		}
 		//new instructions: ir collision.abs() < ship.radius().max(asteroid.radius()) {collision logic}}
