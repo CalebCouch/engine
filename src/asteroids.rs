@@ -250,7 +250,6 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			if self.4 == true {
 				self.shoot(ctx);
 				self.collision(ctx);
-				println!("{:?}", self.get_size(ctx));
 			}
 		}
 
@@ -315,6 +314,7 @@ impl FirstScreen {
 		let header = Header::home(ctx, "Canvas", None);
 		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0), false)
     }
+
 	pub fn shoot(&mut self, ctx: &mut Context) {
 		//how to make ship shoot? we could push a new offset and shape above the position of our ship? we would have to avoid hardcoding our ship's position so we'll need some sort of variable or we quite literally could just index into CanvasLayout lol
 		//issues: we can't push properly cuz we can't self on CanvasLayout
@@ -330,49 +330,56 @@ impl FirstScreen {
 		//make sure the bullets move
 	}
 
-	pub fn get_size(&mut self, ctx: &mut Context) -> (f32, f32) {
+	pub fn get_size(&mut self, ctx: &mut Context) -> Vec<(f32, f32)> {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
+		let mut store: Vec<(f32, f32)> = vec![];
 		for bruh in &mut shape[0..4] {
 			match bruh.1.shape {
 				ShapeType::Ellipse(stroke_width, (width, height), rotation) => {
-					return (width, height);
+					store.push((width, height));
 				},
 				ShapeType::Rectangle(stroke_width, (width, height), rotation) => {
-					return (width, height);
+					store.push((width, height));
 				},
 				ShapeType::RoundedRectangle(stroke_width, (width, height), corner_radius, rotation) => {
-					return (width, height);
+					store.push((width, height));
 				},
 			}
 		}
+		store
 	}
 
 	pub fn collision(&mut self, ctx: &mut Context) {
+		let mut sizes = self.get_size(ctx);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
+		//TODO:
+		//extract sizes from our sizes variable.
+		//make sure we don't hardcode our asteroid sizes and clean that up. maybe we can use enumerate again
+		//fix the collision logic
+		
+		for bruh in &mut sizes[0..4] {
+			println!("{:?}", bruh2);
+			//radius of ship and asteroid
+			let ship_radius: f32 = 27.5;
+			let s_height_width: (f32, f32) = (27.5, 27.5);
+			let s_center = (offset[4].0 + s_height_width.0, offset[4].1 + s_height_width.1);
 
-		//radius of ship and asteroid
-		let ship_radius: f32 = 27.5;
-		let asteroid_radius: f32 = 30.0;
+			//getting the center of asteroid and ship
+			let a_center = (offset[3].0 + a_height_width.0, offset[3].1 + a_height_width.1);
 
-		//height and width of asteroid and ship (already halved)
-		let a_height_width: (f32, f32) = (30.0, 30.0);
-		let s_height_width: (f32, f32) = (27.5, 27.5);
+			//getting the distance from eachother's centers
+			let distance_x = (s_center.0 - a_center.0).abs();
+			let distance_y = (s_center.1 - a_center.1).abs();
 
-		//getting the center of asteroid and ship
-		let a_center = (offset[3].0 + a_height_width.0, offset[3].1 + a_height_width.1);
-		let s_center = (offset[4].0 + s_height_width.0, offset[4].1 + s_height_width.1);
-
-		//getting the distance from eachother's centers
-		let distance_x = (s_center.0 - a_center.0).abs();
-		let distance_y = (s_center.1 - a_center.1).abs();
-		//need to somehow make this a singular f32...w
-		if distance_x < ship_radius.max(asteroid_radius) {
-			if distance_y < ship_radius.max(asteroid_radius) {
-				println!("it worked");
+			//need to somehow make this a singular f32...w
+			if distance_x < ship_radius.max(asteroid_radius) {
+				if distance_y < ship_radius.max(asteroid_radius) {
+					println!("it worked");
+				}
 			}
 		}
 		//new instructions: ir collision.abs() < ship.radius().max(asteroid.radius()) {collision logic}}
