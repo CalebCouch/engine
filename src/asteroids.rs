@@ -330,18 +330,25 @@ impl FirstScreen {
 		//make sure the bullets move
 	}
 	pub fn collision(&mut self, ctx: &mut Context) {
-		//get the radius of asteroids/ships. add the width and height to the offset to get the center. check if ship.center() - asteroid.center() is within your radius
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
-		let a_values: (f32, f32) = (30.0, 30.0);
-		let s_values: (f32, f32) = (27.5, 27.5);
+		let a_height_width: (f32, f32) = (30.0, 30.0);
+		let s_height_width: (f32, f32) = (27.5, 27.5);
 		let a_center = (offset[3].0 + a_values.0, offset[3].1 + a_values.1);
 		let s_center = (offset[4].0 + s_values.0, offset[4].1 + s_values.1);
-		let a_center = a_add.0 - s_add.0;
-		let s_center = a_add.1 - a_add.1;
-		println!("asteroid radius {}", a_radius);
-		println!("ship radius {}", s_radius);
+		let collision = (s_center.0 - a_center.1, s_center.1 - a_center.1);
+		println!("asteroid radius {:?}", a_center);
+		println!("ship radius {:?}", s_center);
+		println!("this is collision {:?}", collision);
+		if collision.abs() < s_values.0.max(a_values.0) {
+			println!("it worked");
+		}
+		//new instructions: ir collision.abs() < ship.radius().max(asteroid.radius()) {collision logic}}
+		//get the radius of asteroids/ships. add the width and height to the offset to get the center. check if ship.center() - asteroid.center() is within your radius (the ship's)
+		//so the height or width of a circle divided by 2 are the radius
+		//offset is in the top-left corner of the circle
+		//center is a coordinate
 	}
 }
 
