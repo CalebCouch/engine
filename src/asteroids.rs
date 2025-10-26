@@ -229,10 +229,10 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		self.2 = (4.0, 4.0);
 		let offset = self.1.content().find_at::<Canvas>(0).unwrap();
 		let slices = &mut offset.0.0;
-		/*for bruh in &mut slices[0..4] {
+		/*for elements in &mut slices.into_iter() {
 			//println!("{:?}", bruh);
-			let asteroids = (bruh.0 + self.2.0, bruh.1 + self.2.0);
-			*bruh = asteroids;
+			let asteroids = (elements.0 + self.2.0, elements.1 + self.2.0);
+			*elements = asteroids;
 		}*/
 		if slices[0] > (1000.0, 1000.0) {
 			slices[0] = (20.0, 20.0);
@@ -260,11 +260,11 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			//COMPLETED: add ship movement
 			//HALFWAY COMPLETED: create a bumper with the score and lives
 			//HALFWAY COMPLETED: make ship shoot
+			//HALFWAY COMPLETED: add asteroid collision and splitting into smaller asteroids
 			//create a way to automatically generate asteroids. definetely going to be using .push()
-			//add asteroid collision and splitting into smaller asteroids
-			//replace shapes with sprites
-			//BUGS: any named key double presses
 			//create death and respawn + update score board
+			//replace shapes with sprites
+			//BUGS: any named key double presses, all offsets move in the asteroid move code, including the ship's
 			self.3 = (12.0, 12.0);
 			let offset = self.1.content().find_at::<Canvas>(0).unwrap();
 			let slices = &mut offset.0.0;
@@ -273,21 +273,16 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 					self.4 = true;
 				},
 				Key::Named(NamedKey::ArrowUp) => {
-					let up = (slices[4].1 - self.3.1);
-					slices[4].1 = up;
-					println!("{}", self.1.content().find_at::<Canvas>(0).unwrap().0.0[4].1);
+					slices[4].1 = (slices[4].1 - self.3.1);
 				},
 				Key::Named(NamedKey::ArrowDown) => {
-					let down = (slices[4].1 + self.3.1);
-					slices[4].1 = down;
+					slices[4].1 = (slices[4].1 + self.3.1);
 				},
 				Key::Named(NamedKey::ArrowRight) => {
-					let right = (slices[4].0 + self.3.0);
-					slices[4].0 = right;
+					slices[4].0 = (slices[4].0 + self.3.0);
 				},
 				Key::Named(NamedKey::ArrowLeft) => {
-					let left = (slices[4].0 - self.3.0);
-					slices[4].0 = left;
+					slices[4].0 = (slices[4].0 - self.3.0);
 				}
 				_ => {
 					println!("wrong key press?");
@@ -324,8 +319,8 @@ impl FirstScreen {
 		let shape = &mut canvas.1[3].1.shape;
 		//delete all of this code and revisit it, it clearly isn't working.
 		offset[5] = offset[4];
-			let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
-			offset[5] = shoot;
+		let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
+		offset[5] = shoot;
 		//make sure that bullets spawn a little above the ship's front lol
 		//make sure the bullets move
 	}
@@ -335,8 +330,9 @@ impl FirstScreen {
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
 		let mut store: Vec<(f32, f32)> = vec![];
-		for bruh in &mut shape[0..4] {
-			match bruh.1.shape {
+		//need to make it more automatic, we hardcoded 0..4
+		for elements in &mut shape.iter() {
+			match elements.1.shape {
 				ShapeType::Ellipse(stroke_width, (width, height), rotation) => {
 					store.push((width, height));
 				},
@@ -368,18 +364,29 @@ impl FirstScreen {
 			let ship_center = (offset[4].0 + ship_size.0, offset[4].1 + ship_size.1);
 
 			//getting the center of asteroid and ship
+			let asteroid_radius = (asteroid_height / 2.0);
 			let asteroid_center = (offset[index].0 + asteroid_height / 2.0, offset[index].1 + asteroid_width / 2.0);
 
 			//getting the distance from eachother's centers
-			let distance_x = (ship_center.0 - a_center.0).abs();
-			let distance_y = (ship_center.1 - a_center.1).abs();
+			let distance_x = (ship_center.0 - asteroid_center.0).abs();
+			let distance_y = (ship_center.1 - asteroid_center.1).abs();
 
 			//need to somehow make this a singular f32...w
 			if distance_x < ship_radius.max(asteroid_radius) {
+					println!("it worked");
 				if distance_y < ship_radius.max(asteroid_radius) {
 					println!("it worked");
 				}
 			}
+			println!("this is the asteroid height {}", asteroid_height);
+			println!("this is the asteroid width {}", asteroid_width);
+			println!("this is the ship_radius {}", ship_radius);
+			println!("this is the ship_size {:?}", ship_size);
+			println!("this is the ship center {:?}", ship_center);
+			println!("this is the asteroid radius {}", asteroid_radius);
+			println!("this is the asteroid center {:?}", asteroid_center);
+			println!("this is the distance x {}", distance_x);
+			println!("this is the distance y {}", distance_y);
 		}
 		//new instructions: ir collision.abs() < ship.radius().max(asteroid.radius()) {collision logic}}
 		//get the radius of asteroids/ships. add the width and height to the offset to get the center. check if ship.center() - asteroid.center() is within your radius (the ship's)
