@@ -220,7 +220,6 @@ impl Canvas {
     }
 }
 
-//display ellipse when mouse is clicked
 #[derive(Debug, Component)]
 pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32), #[skip] bool);
 impl OnEvent for FirstScreen {
@@ -246,12 +245,6 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if slices[3] > (1000.0, 1000.0) {
 			slices[3] = (260.0, 200.0);
 		}
-		for test in 0..10 {
-			if self.4 == true {
-				self.shoot(ctx);
-				self.collision(ctx);
-			}
-		}
 
 	} else if let Some(KeyboardEvent{key: my_key, state: my_state}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
@@ -270,7 +263,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			let slices = &mut offset.0.0;
 			match my_key {
 				Key::Named(NamedKey::Space) => {
-					self.4 = true;
+					self.collision(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					slices[4].1 = (slices[4].1 - self.3.1);
@@ -288,7 +281,6 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 					println!("wrong key press?");
 				}
 			}
-			//let asteroid = (self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].0 + self.2.0, self.1.content().find_at::<Canvas>(0).unwrap().0.0[0..3].1 + self.2.1);
 			//maybe use filter to create certain conditions
 		}
 		true
@@ -302,8 +294,6 @@ impl AppPage for FirstScreen {
 
 impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
-		//let button = Button::new(ctx, None, None, None, None, ButtonSize::Medium, ButtonWidth::Expand, ButtonStyle::Primary, ButtonState::Default, Offset::Center, |ctx: &mut Context| {}, Some("Hello".to_string()));
-		//let bumper = Bumper::single_button(ctx, button);
 		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)), Box::new(Bumper::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
@@ -330,7 +320,6 @@ impl FirstScreen {
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
 		let mut store: Vec<(f32, f32)> = vec![];
-		//need to make it more automatic, we hardcoded 0..4
 		for elements in &mut shape.iter() {
 			match elements.1.shape {
 				ShapeType::Ellipse(stroke_width, (width, height), rotation) => {
@@ -352,47 +341,38 @@ impl FirstScreen {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.1;
-		//TODO:
-		//extract sizes from our sizes variable.
-		//make sure we don't hardcode our asteroid sizes and clean that up. maybe we can use enumerate again
-		//fix the collision logic at the bottom
-		//create enumerator to get index
 		for (index, (asteroid_height, asteroid_width)) in sizes.iter().enumerate() {
-			//radius of ship and asteroid
 			let ship_radius: f32 = 27.5;
-			let ship_size: (f32, f32) = (27.5, 27.5);
-			let ship_center = (offset[4].0 + ship_size.0, offset[4].1 + ship_size.1);
+			let ship_size: (f32, f32) = (55.0, 55.0);
+			let ship_center = (offset[4].0 + ship_size.0 / 2.0, offset[4].1 + ship_size.1 / 2.0);
 
-			//getting the center of asteroid and ship
 			let asteroid_radius = (asteroid_height / 2.0);
 			let asteroid_center = (offset[index].0 + asteroid_height / 2.0, offset[index].1 + asteroid_width / 2.0);
 
-			//getting the distance from eachother's centers
 			let distance_x = (ship_center.0 - asteroid_center.0).abs();
 			let distance_y = (ship_center.1 - asteroid_center.1).abs();
 
-			//need to somehow make this a singular f32...w
 			if distance_x < ship_radius.max(asteroid_radius) {
-					println!("it worked");
+					println!("distance x was checked");
 				if distance_y < ship_radius.max(asteroid_radius) {
-					println!("it worked");
+					println!("distance Y was checked");
+					//offset.remove(4);
+					//shape.remove(4);
+					//collision logic: remove both the asteroid and ship. asteroid is gonna be tricky
+					//update lives
+					//create explosion component and replace Ship's position with explosion (will be just a shape for now)
+					//add Ship back (create limiter: if lives == 0, don't spawn and end game)
 				}
 			}
-			println!("this is the asteroid height {}", asteroid_height);
+			/*println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
-			println!("this is the ship_radius {}", ship_radius);
-			println!("this is the ship_size {:?}", ship_size);
 			println!("this is the ship center {:?}", ship_center);
 			println!("this is the asteroid radius {}", asteroid_radius);
 			println!("this is the asteroid center {:?}", asteroid_center);
 			println!("this is the distance x {}", distance_x);
 			println!("this is the distance y {}", distance_y);
+			println!("NEXT ASTEROID STATS");*/
 		}
-		//new instructions: ir collision.abs() < ship.radius().max(asteroid.radius()) {collision logic}}
-		//get the radius of asteroids/ships. add the width and height to the offset to get the center. check if ship.center() - asteroid.center() is within your radius (the ship's)
-		//so the height or width of a circle divided by 2 are the radius
-		//offset is in the top-left corner of the circle
-		//center is a coordinate
 	}
 }
 
