@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use rand::thread_rng;
+use rand::distr::weighted::WeightedIndex;
 use std::any::Any;
 use pelican_ui::*;
 use runtime::{self, Service, ServiceList, ThreadContext, async_trait, Services};
@@ -266,8 +268,9 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			let slices = &mut offset.0.0;
 			match my_key {
 				Key::Named(NamedKey::Space) => {
-					self.shoot(ctx);
+					//self.shoot(ctx);
 					self.collision(ctx);
+					self.generate_asteroids(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					slices[0].1 = (slices[0].1 - self.3.1);
@@ -351,8 +354,24 @@ impl FirstScreen {
 		store
 	}
 
-	pub fn generate_asteroids(ctx: &mut Context) {
-		
+	pub fn generate_asteroids(&mut self, ctx: &mut Context) {
+		//weight index system goes here
+		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
+		let offset = &mut canvas.0.0;
+		let shape = &mut canvas.2;
+		//push offset in proportion to ship's location
+		let phrases = vec![(Asteroid::new(ctx, 80.0, 80.0), 5), (Asteroid::new(ctx, 60.0, 60.0), 5), (Asteroid::new(ctx, 40.0, 40.0), 5)];
+		let mut rng = thread_rng();
+		let weight = WeightedIndex::new(phrases.iter().map(|x| x.1)).unwrap();
+		for _ in 0..20 {
+			//println!("{}", phrases[weight.sample(&mut rng)].0);
+		}
+		offset.push((200.0, 200.0));
+		shape.push(Asteroid::new(ctx, 80.0, 80.0));
+		offset.push((100.0, 100.0));
+		shape.push(Asteroid::new(ctx, 60.0, 60.0));
+		offset.push((50.0, 50.0));
+		shape.push(Asteroid::new(ctx, 40.0, 40.0));
 	}
 	pub fn collision(&mut self, ctx: &mut Context) {
 		let mut sizes = self.get_size(ctx);
@@ -362,10 +381,10 @@ impl FirstScreen {
 		for (index, (asteroid_height, asteroid_width)) in sizes.iter().enumerate() {
 			let ship_radius: f32 = 27.5;
 			let ship_size: (f32, f32) = (55.0, 55.0);
-			let ship_center = (offset[0].0 + (ship_size.0 / 2.0), offset[0].1 + (ship_size.1 / 2.0));
+			let ship_center = (offset[0].0 + ship_size.0 / 2.0, offset[0].1 + ship_size.1 / 2.0);
 
 			let asteroid_radius = (asteroid_height / 2.0);
-			let asteroid_center = (offset[index].0 + (asteroid_height / 2.0), offset[index].1 + (asteroid_width / 2.0));
+			let asteroid_center = (offset[index].0 + asteroid_height / 2.0, offset[index].1 + asteroid_width / 2.0);
 
 			let distance_x = (ship_center.0 - asteroid_center.0).abs();
 			let distance_y = (ship_center.1 - asteroid_center.1).abs();
@@ -379,14 +398,14 @@ impl FirstScreen {
 					//create explosion component and replace Ship's position with explosion (will be just a shape for now)
 					//add Ship back (create limiter: if lives == 0, don't spawn and end game)
 			}
-			println!("this is the asteroid height {}", asteroid_height);
+			/*println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
 			println!("this is the ship center {:?}", ship_center);
 			println!("this is the asteroid radius {}", asteroid_radius);
 			println!("this is the asteroid center {:?}", asteroid_center);
 			println!("this is the distance x {}", distance_x);
 			println!("this is the distance y {}", distance_y);
-			println!("NEXT ASTEROID STATS");
+			println!("NEXT ASTEROID STATS");*/
 		}
 	}
 }
