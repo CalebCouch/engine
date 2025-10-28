@@ -1,23 +1,17 @@
-use std::collections::HashMap;
-use rand::thread_rng;
+use rand::rng;
 use rand::distr::weighted::WeightedIndex;
 use rand::distr::Distribution;
-use std::any::Any;
 use pelican_ui::*;
-use runtime::{self, Service, ServiceList, ThreadContext, async_trait, Services};
-use serde::de::Unexpected::Str;
-use pelican_ui::drawable::{Component, Image};
-use pelican_ui::events::{Event, OnEvent, TickEvent, KeyboardEvent, KeyboardState, NamedKey, Key, MouseEvent, MouseState};
+use runtime::{self, /*Service, ServiceList, ThreadContext, async_trait,*/ Services};
+use pelican_ui::drawable::{Component};
+use pelican_ui::events::{Event, OnEvent, TickEvent, KeyboardEvent, KeyboardState, NamedKey, Key, /*MouseEvent, MouseState*/};
 use pelican_ui::drawable::{Shape, Color, Drawable, ShapeType, Align};
-use pelican_ui::layout::{SizeRequest, Area, Layout, DefaultStack};
-use std::collections::BTreeMap;
-use serde::{Serialize, Deserialize};
-use std::time::Duration;
+use pelican_ui::layout::{SizeRequest, Area, Layout, /*DefaultStack*/};
 
 use pelican_ui_std::*;
 pub struct TestApp;
 impl Plugins for TestApp {
-    fn plugins(ctx: &mut Context) -> Vec<Box<dyn Plugin>> {vec![]}
+    fn plugins(_ctx: &mut Context) -> Vec<Box<dyn Plugin>> {vec![]}
 }
 impl Services for TestApp {}
 
@@ -56,7 +50,7 @@ impl Application for TestApp {
 #[derive(Debug, Component)]
 pub struct CustomNavigation(Stack, EitherOr<Interface, Interface>);
 impl OnEvent for CustomNavigation{
-	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+	fn on_event(&mut self, _ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(nav_event) = event.downcast_ref::<NavEvent>() {
 			self.1.display_left(nav_event.0);
 			false
@@ -67,7 +61,7 @@ impl OnEvent for CustomNavigation{
 #[derive(Debug, Clone)]
 pub struct NavEvent(bool);
 impl Event for NavEvent{
-	fn pass(self: Box<Self>, ctx: &mut Context, children: Vec<((f32, f32), (f32, f32))>) -> Vec<Option<Box<dyn Event>>> {
+	fn pass(self: Box<Self>, _ctx: &mut Context, children: Vec<((f32, f32), (f32, f32))>) -> Vec<Option<Box<dyn Event>>> {
 		children.iter().map(|_| Some(self.clone() as Box<dyn Event>)).collect()
 	}
 }
@@ -145,7 +139,7 @@ impl Bumper {
 pub struct Ship(Stack, Shape);
 impl OnEvent for Ship {}
 impl Ship {
-	pub fn new(ctx: &mut Context) -> Self {
+	pub fn new(_ctx: &mut Context) -> Self {
 		Ship(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
@@ -161,7 +155,7 @@ impl Ship {
 pub struct Asteroid(Stack, Shape);
 impl OnEvent for Asteroid {}
 impl Asteroid {
-	pub fn new(ctx: &mut Context, height: f32, width: f32) -> Self {
+	pub fn new(_ctx: &mut Context, height: f32, width: f32) -> Self {
 		Asteroid(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
@@ -174,20 +168,13 @@ impl Asteroid {
 
 #[derive(Debug, Component)]
 pub struct Canvas(CanvasLayout, Vec<Ship>, Vec<Asteroid>, Asteroid);
-impl OnEvent for Canvas {
-	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
-		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-		} else if let Some(MouseEvent{position: Some(my_position), state: my_state}) = event.downcast_ref::<MouseEvent>() {
-		}
-		true
-	}
-}
+impl OnEvent for Canvas {}
 
 //move ship to front
 impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
-			CanvasLayout(vec![(20.0, 270.0), (300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ (-200.0, -200.0)]),
+			CanvasLayout(vec![(160.0, 200.0), (300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ (-200.0, -200.0)]),
 			vec![Ship::new(ctx)],
 			vec![Asteroid::new(ctx, 80.0, 80.0), Asteroid::new(ctx, 60.0, 60.0), Asteroid::new(ctx, 40.0, 40.0), Asteroid::new(ctx, 60.0, 60.0)],
 			Asteroid::new(ctx, 40.0, 40.0),
@@ -199,14 +186,14 @@ impl Canvas {
 pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32), #[skip] bool);
 impl OnEvent for FirstScreen {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
-	if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+	if let Some(_tick_event) = event.downcast_ref::<TickEvent>() {
 		self.2 = (2.0, 2.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0[1..];
-		/*for elements in &mut *slices {
+		for elements in &mut *offset {
 			let asteroids = (elements.0 + self.2.0, elements.1 + self.2.0);
 			*elements = asteroids;
-		}*/
+		}
 				if offset[1] > (1000.0, 1000.0) {
 			offset[1] = (200.0, 20.0);
 		}
@@ -219,16 +206,12 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if offset[4] > (1000.0, 1000.0) {
 			offset[4] = (20.0, 20.0);
 		}
-		if self.4 == true {
-			let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
-			offset[5] = shoot;
-		}
 	} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
 			//COMPLETED: make code cleaner and less hardcoded
 			//COMPLETED: add ship movement
-			//HALFWAY COMPLETED: set the ship to be the center of the screen and when i hit the arrow keys move all the asteroids.
+			//COMPLETED: set the ship to be the center of the screen and when i hit the arrow keys move all the asteroids.
 			//HALFWAY COMPLETED: create a bumper with the score and lives
 			//HALFWAY COMPLETED: make ship shoot
 			//HALFWAY COMPLETED: add asteroid collision and splitting into smaller asteroids
@@ -239,42 +222,41 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			//add rotation
 			//get rid of the looping asteroids and push new ones automatically. use weighted index function i created to make it so the chances of each variant of asteroid are different
 			//BUGS: any named key double presses, all offsets move in the asteroid move code, including the ship's
-			self.3 = (12.0, 12.0);
-			let offset = self.1.content().find_at::<Canvas>(0).unwrap();
-			let slices = &mut offset.0.0;
+			self.3 = (20.0, 20.0);
+			let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
+			let offset = &mut canvas.0.0;
 			match my_key {
 				Key::Named(NamedKey::Space) => {
 					//self.shoot(ctx);
 					self.collision(ctx);
 					self.generate_asteroids(ctx);
 					self.shoot(ctx);
-					self.4 = true;
 				},
 				Key::Named(NamedKey::ArrowUp) => {
-					//slices[0].1 = (slices[0].1 - self.3.1);
-					for elements in &mut *slices {
-						let asteroids = (elements.1 + self.2.1);
+					//slices[0].1 = (offset[0].1 - self.3.1);
+					for elements in &mut offset[1..] {
+						let asteroids = elements.1 + self.3.1;
 						elements.1 = asteroids;
 					}
 				},
 				Key::Named(NamedKey::ArrowDown) => {
-					//slices[0].1 = (slices[0].1 + self.3.1);
-					for elements in &mut *slices {
-						let asteroids = (elements.1 - self.2.1);
+					//slices[0].1 = (offset[0].1 + self.3.1);
+					for elements in &mut offset[1..] {
+						let asteroids = elements.1 - self.3.1;
 						elements.1 = asteroids;
 					}
 				},
 				Key::Named(NamedKey::ArrowRight) => {
-					//slices[0].0 = (slices[0].0 + self.3.0);
-					for elements in &mut *slices {
-						let asteroids = (elements.0 - self.2.1);
+					//slices[0].0 = (offset[0].0 + self.3.0);
+					for elements in &mut offset[1..] {
+						let asteroids = elements.0 - self.3.1;
 						elements.0 = asteroids;
 					}
 				},
 				Key::Named(NamedKey::ArrowLeft) => {
-					//slices[0].0 = (slices[0].0 - self.3.0);
-					for elements in &mut *slices {
-						let asteroids = (elements.0 + self.2.1);
+					//slices[0].0 = (offset[0].0 - self.3.0);
+					for elements in &mut offset[1..] {
+						let asteroids = elements.0 + self.3.1;
 						elements.0 = asteroids;
 					}
 				}
@@ -301,29 +283,30 @@ impl FirstScreen {
 		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0), false)
     }
 
-	pub fn shoot(&mut self, ctx: &mut Context) {
+	pub fn shoot(&mut self, _ctx: &mut Context) {
 		self.2 = (2.0, 2.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
-		let shape = &mut canvas.3.1.shape;
-
+		//let shape = &mut canvas.3.1.shape;
 		offset[5] = offset[0];
+		let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
+		offset[5] = shoot;
+
 	}
 
-	pub fn get_size(&mut self, ctx: &mut Context) -> Vec<(f32, f32)> {
+	pub fn get_size(&mut self, _ctx: &mut Context) -> Vec<(f32, f32)> {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
-		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.2;
 		let mut store: Vec<(f32, f32)> = vec![];
 		for elements in &mut shape.iter() {
 			match elements.1.shape {
-				ShapeType::Ellipse(stroke_width, (width, height), rotation) => {
+				ShapeType::Ellipse(_stroke_width, (width, height), _rotation) => {
 					store.push((width, height));
 				},
-				ShapeType::Rectangle(stroke_width, (width, height), rotation) => {
+				ShapeType::Rectangle(_stroke_width, (width, height), _rotation) => {
 					store.push((width, height));
 				},
-				ShapeType::RoundedRectangle(stroke_width, (width, height), corner_radius, rotation) => {
+				ShapeType::RoundedRectangle(_stroke_width, (width, height), _corner_radius, _rotation) => {
 					store.push((width, height));
 				},
 			}
@@ -332,12 +315,10 @@ impl FirstScreen {
 	}
 
 	pub fn generate_asteroids(&mut self, ctx: &mut Context) {
-		//weight index system goes here
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.2;
-		//push offset in proportion to ship's location
-		let mut rng = thread_rng();
+		let mut rng = rng();
 		let asteroids = vec![
 			(Asteroid::new(ctx, 80.0, 80.0), 1),
 			(Asteroid::new(ctx, 60.0, 60.0), 3),
@@ -353,31 +334,31 @@ impl FirstScreen {
 		let p_weight = WeightedIndex::new(positions.iter().map(|x| x.1)).unwrap();
 		//i could try cloning
 
-		/*offset.push(positions[p_weight.sample(&mut rng)].0);
-		shape.push(asteroids[a_weight.sample(&mut rng)].0);
-
 		offset.push(positions[p_weight.sample(&mut rng)].0);
 		shape.push(asteroids[a_weight.sample(&mut rng)].0);
 
 		offset.push(positions[p_weight.sample(&mut rng)].0);
-		shape.push(asteroids[a_weight.sample(&mut rng)].0);*/
+		shape.push(asteroids[a_weight.sample(&mut rng)].0);
+
+		offset.push(positions[p_weight.sample(&mut rng)].0);
+		shape.push(asteroids[a_weight.sample(&mut rng)].0);
 	}
 	pub fn collision(&mut self, ctx: &mut Context) {
-		let mut sizes = self.get_size(ctx);
+		let sizes = self.get_size(ctx);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
-		let shape = &mut canvas.1;
+		//let shape = &mut canvas.1;
 		for (index, (asteroid_height, asteroid_width)) in sizes.iter().enumerate() {
 			let ship_radius: f32 = 27.5;
 			let ship_size: (f32, f32) = (55.0, 55.0);
 			let ship_center = (offset[0].0 + ship_size.0 / 2.0, offset[0].1 + ship_size.1 / 2.0);
 
-			let asteroid_radius = (asteroid_height / 2.0);
+			let asteroid_radius = asteroid_height / 2.0;
 			let asteroid_center = (offset[index].0 + asteroid_height / 2.0, offset[index].1 + asteroid_width / 2.0);
 
 			let distance_x = (ship_center.0 - asteroid_center.0).abs();
 			let distance_y = (ship_center.1 - asteroid_center.1).abs();
-			let radii = (ship_radius + asteroid_radius);
+			let radii = ship_radius + asteroid_radius;
 			if distance_x < radii && distance_y < radii {
 					println!("the distance was checked");
 					//offset.remove(0);
@@ -409,8 +390,6 @@ impl FirstScreen {
 
  impl SecondPage {
      pub fn new(ctx: &mut Context) -> Self {
-         let color = ctx.theme.colors.text.heading;
-         let icon = Icon::new(ctx, "down", color, 128.0);
          let child: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx))];
          let header = Header::home(ctx, "CONGRATULATIONS", None);
          let content = Content::new(ctx, Offset::Center, child);
@@ -421,7 +400,7 @@ impl FirstScreen {
 #[derive(Debug)]
 pub struct CanvasLayout(Vec<(f32, f32)>);//A vector of offsets (left, top)
 impl Layout for CanvasLayout {
-    fn request_size(&self, _ctx: &mut Context, children: Vec<SizeRequest>) -> SizeRequest {
+    fn request_size(&self, _ctx: &mut Context, _children: Vec<SizeRequest>) -> SizeRequest {
         SizeRequest::new(0.0, 0.0, f32::MAX, f32::MAX)
     }
 
