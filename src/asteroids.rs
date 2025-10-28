@@ -158,17 +158,17 @@ impl Ship {
 pub struct Asteroid(Stack, Shape);
 impl OnEvent for Asteroid {}
 impl Asteroid {
-	pub fn new(ctx: &mut Context) -> Self {
+	pub fn new(ctx: &mut Context, height: f32, width: f32) -> Self {
 		Asteroid(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Ellipse(5.0, (120.0, 120.0), 0.0),
+				shape: ShapeType::Ellipse(5.0, (width, height), 0.0),
 				color: Color::from_hex("#000000", 255),
 			},
 		)
 	}
 
-	pub fn big(ctx: &mut Context) -> Self {
+	/*pub fn big(ctx: &mut Context) -> Self {
 		Asteroid(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
@@ -196,11 +196,11 @@ impl Asteroid {
 				color: Color::from_hex("#000000", 255),
 			},
 		)
-	}
+	}*/
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Ship, Vec<Asteroid>, Asteroid);
+pub struct Canvas(CanvasLayout, Vec<Ship>, Vec<Asteroid>, Asteroid);
 impl OnEvent for Canvas {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -215,9 +215,9 @@ impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
 			CanvasLayout(vec![(20.0, 270.0), (300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ (-200.0, -200.0)]),
-			Ship::new(ctx),
-			vec![Asteroid::big(ctx), Asteroid::medium(ctx), /*Asteroid::small(ctx),*/ Asteroid::small(ctx), /*Asteroid::medium(ctx),*/ Asteroid::medium(ctx)],
-			Asteroid::small(ctx),
+			vec![Ship::new(ctx)],
+			vec![Asteroid::new(ctx, 80.0, 80.0), Asteroid::new(ctx, 60.0, 60.0), Asteroid::new(ctx, 40.0, 40.0), Asteroid::new(ctx, 60.0, 60.0)],
+			Asteroid::new(ctx, 40.0, 40.0),
 		)
     }
 }
@@ -230,10 +230,10 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		self.2 = (2.0, 2.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let slices = &mut canvas.0.0[1..];
-		for elements in &mut *slices {
+		/*for elements in &mut *slices {
 			let asteroids = (elements.0 + self.2.0, elements.1 + self.2.0);
 			*elements = asteroids;
-		}
+		}*/
 				if slices[1] > (1000.0, 1000.0) {
 			slices[1] = (200.0, 20.0);
 		}
@@ -267,6 +267,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			match my_key {
 				Key::Named(NamedKey::Space) => {
 					self.shoot(ctx);
+					self.collision(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					slices[0].1 = (slices[0].1 - self.3.1);
@@ -361,25 +362,22 @@ impl FirstScreen {
 		for (index, (asteroid_height, asteroid_width)) in sizes.iter().enumerate() {
 			let ship_radius: f32 = 27.5;
 			let ship_size: (f32, f32) = (55.0, 55.0);
-			let ship_center = (offset[4].0 + (ship_size.0 / 2.0), offset[4].1 + (ship_size.1 / 2.0));
+			let ship_center = (offset[0].0 + (ship_size.0 / 2.0), offset[0].1 + (ship_size.1 / 2.0));
 
 			let asteroid_radius = (asteroid_height / 2.0);
 			let asteroid_center = (offset[index].0 + (asteroid_height / 2.0), offset[index].1 + (asteroid_width / 2.0));
 
 			let distance_x = (ship_center.0 - asteroid_center.0).abs();
 			let distance_y = (ship_center.1 - asteroid_center.1).abs();
-			//put s_radius and a_radius into variable and use for both
-			if distance_x < ship_radius + asteroid_radius {
-					println!("distance x was checked");
-				if distance_y < ship_radius + asteroid_radius {
-					println!("distance Y was checked");
-					//offset.remove(4);
-					//shape.remove(4);
+			let radii = (ship_radius + asteroid_radius);
+			if distance_x < radii && distance_y < radii {
+					println!("the distance was checked");
+					//offset.remove(0);
+					//shape.remove(0);
 					//collision logic: remove both the asteroid and ship. asteroid is gonna be tricky
 					//update lives
 					//create explosion component and replace Ship's position with explosion (will be just a shape for now)
 					//add Ship back (create limiter: if lives == 0, don't spawn and end game)
-				}
 			}
 			println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
