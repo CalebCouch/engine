@@ -137,7 +137,7 @@ impl Bumper {
 	}
 }
 
-
+//cloning a resources image is cheap. ctx.add_image is expensive
 #[derive(Debug, Component)]
 pub struct Ship(Stack, Shape);
 impl OnEvent for Ship {}
@@ -153,6 +153,7 @@ impl Ship {
 	}
 }
 
+//one constructor function that accepts the width/height
 #[derive(Debug, Component)]
 pub struct Asteroid(Stack, Shape);
 impl OnEvent for Asteroid {}
@@ -199,7 +200,7 @@ impl Asteroid {
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Vec<Asteroid>, Ship, Asteroid);
+pub struct Canvas(CanvasLayout, Ship, Vec<Asteroid>, Asteroid);
 impl OnEvent for Canvas {
 	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -209,12 +210,13 @@ impl OnEvent for Canvas {
 	}
 }
 
+//move ship to front
 impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
-			CanvasLayout(vec![(300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ (20.0, 270.0), (-200.0, -200.0)]),
-			vec![Asteroid::big(ctx), Asteroid::medium(ctx), /*Asteroid::small(ctx),*/ Asteroid::small(ctx), /*Asteroid::medium(ctx),*/ Asteroid::medium(ctx)],
+			CanvasLayout(vec![(20.0, 270.0), (300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ (-200.0, -200.0)]),
 			Ship::new(ctx),
+			vec![Asteroid::big(ctx), Asteroid::medium(ctx), /*Asteroid::small(ctx),*/ Asteroid::small(ctx), /*Asteroid::medium(ctx),*/ Asteroid::medium(ctx)],
 			Asteroid::small(ctx),
 		)
     }
@@ -225,18 +227,14 @@ pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32), #[sk
 impl OnEvent for FirstScreen {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-		self.2 = (4.0, 4.0);
-		let offset = self.1.content().find_at::<Canvas>(0).unwrap();
-		let slices = &mut offset.0.0;
-		/*for elements in &mut slices.into_iter() {
-			//println!("{:?}", bruh);
+		self.2 = (2.0, 2.0);
+		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
+		let slices = &mut canvas.0.0[1..];
+		for elements in &mut *slices {
 			let asteroids = (elements.0 + self.2.0, elements.1 + self.2.0);
 			*elements = asteroids;
-		}*/
-		if slices[0] > (1000.0, 1000.0) {
-			slices[0] = (20.0, 20.0);
 		}
-		if slices[1] > (1000.0, 1000.0) {
+				if slices[1] > (1000.0, 1000.0) {
 			slices[1] = (200.0, 20.0);
 		}
 		if slices[2] > (1000.0, 1000.0) {
@@ -245,37 +243,58 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		if slices[3] > (1000.0, 1000.0) {
 			slices[3] = (260.0, 200.0);
 		}
-
-	} else if let Some(KeyboardEvent{key: my_key, state: my_state}) = event.downcast_ref::<KeyboardEvent>() {
+		if slices[4] > (1000.0, 1000.0) {
+			slices[4] = (20.0, 20.0);
+		}
+	} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
 			//COMPLETED: make code cleaner and less hardcoded
 			//COMPLETED: add ship movement
+			//COMPLETED: set the ship to be the center of the screen and when i hit the arrow keys move all the asteroids.
 			//HALFWAY COMPLETED: create a bumper with the score and lives
 			//HALFWAY COMPLETED: make ship shoot
 			//HALFWAY COMPLETED: add asteroid collision and splitting into smaller asteroids
 			//create a way to automatically generate asteroids. definetely going to be using .push()
 			//create death and respawn + update score board
 			//replace shapes with sprites
+			//figure out the front facing part of our ship is
+			//get rid of the looping asteroids and push new ones automatically. use weighted index function i created to make it so the chances of each variant of asteroid are different
 			//BUGS: any named key double presses, all offsets move in the asteroid move code, including the ship's
 			self.3 = (12.0, 12.0);
 			let offset = self.1.content().find_at::<Canvas>(0).unwrap();
 			let slices = &mut offset.0.0;
 			match my_key {
 				Key::Named(NamedKey::Space) => {
-					self.collision(ctx);
+					self.shoot(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
-					slices[4].1 = (slices[4].1 - self.3.1);
+					slices[0].1 = (slices[0].1 - self.3.1);
+					for elements in &mut *slices {
+						let asteroids = (elements.1 + self.2.1);
+						elements.1 = asteroids;
+					}
 				},
 				Key::Named(NamedKey::ArrowDown) => {
-					slices[4].1 = (slices[4].1 + self.3.1);
+					slices[0].1 = (slices[0].1 + self.3.1);
+					for elements in &mut *slices {
+						let asteroids = (elements.1 - self.2.1);
+						elements.1 = asteroids;
+					}
 				},
 				Key::Named(NamedKey::ArrowRight) => {
-					slices[4].0 = (slices[4].0 + self.3.0);
+					slices[0].0 = (slices[0].0 + self.3.0);
+					for elements in &mut *slices {
+						let asteroids = (elements.0 - self.2.1);
+						elements.0 = asteroids;
+					}
 				},
 				Key::Named(NamedKey::ArrowLeft) => {
-					slices[4].0 = (slices[4].0 - self.3.0);
+					slices[0].0 = (slices[0].0 - self.3.0);
+					for elements in &mut *slices {
+						let asteroids = (elements.0 + self.2.1);
+						elements.0 = asteroids;
+					}
 				}
 				_ => {
 					println!("wrong key press?");
@@ -291,7 +310,7 @@ impl AppPage for FirstScreen {
 	fn has_nav(&self) -> bool { true }
 	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<dyn AppPage>, Box<dyn AppPage>> { Err(self) }
 }
-
+//ctx.assets.add_image()
 impl FirstScreen {
     pub fn new(ctx: &mut Context) -> Self {
 		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)), Box::new(Bumper::new(ctx))];
@@ -301,24 +320,19 @@ impl FirstScreen {
     }
 
 	pub fn shoot(&mut self, ctx: &mut Context) {
-		//how to make ship shoot? we could push a new offset and shape above the position of our ship? we would have to avoid hardcoding our ship's position so we'll need some sort of variable or we quite literally could just index into CanvasLayout lol
-		//issues: we can't push properly cuz we can't self on CanvasLayout
-		self.2 = (20.0, 20.0);
+		self.2 = (2.0, 2.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
-		let shape = &mut canvas.1[3].1.shape;
-		//delete all of this code and revisit it, it clearly isn't working.
-		offset[5] = offset[4];
+		let shape = &mut canvas.3.1.shape;
+		offset[5] = offset[0];
 		let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
 		offset[5] = shoot;
-		//make sure that bullets spawn a little above the ship's front lol
-		//make sure the bullets move
 	}
 
 	pub fn get_size(&mut self, ctx: &mut Context) -> Vec<(f32, f32)> {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
-		let shape = &mut canvas.1;
+		let shape = &mut canvas.2;
 		let mut store: Vec<(f32, f32)> = vec![];
 		for elements in &mut shape.iter() {
 			match elements.1.shape {
@@ -336,6 +350,9 @@ impl FirstScreen {
 		store
 	}
 
+	pub fn generate_asteroids(ctx: &mut Context) {
+		
+	}
 	pub fn collision(&mut self, ctx: &mut Context) {
 		let mut sizes = self.get_size(ctx);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
@@ -344,17 +361,17 @@ impl FirstScreen {
 		for (index, (asteroid_height, asteroid_width)) in sizes.iter().enumerate() {
 			let ship_radius: f32 = 27.5;
 			let ship_size: (f32, f32) = (55.0, 55.0);
-			let ship_center = (offset[4].0 + ship_size.0 / 2.0, offset[4].1 + ship_size.1 / 2.0);
+			let ship_center = (offset[4].0 + (ship_size.0 / 2.0), offset[4].1 + (ship_size.1 / 2.0));
 
 			let asteroid_radius = (asteroid_height / 2.0);
-			let asteroid_center = (offset[index].0 + asteroid_height / 2.0, offset[index].1 + asteroid_width / 2.0);
+			let asteroid_center = (offset[index].0 + (asteroid_height / 2.0), offset[index].1 + (asteroid_width / 2.0));
 
 			let distance_x = (ship_center.0 - asteroid_center.0).abs();
 			let distance_y = (ship_center.1 - asteroid_center.1).abs();
-
-			if distance_x < ship_radius.max(asteroid_radius) {
+			//put s_radius and a_radius into variable and use for both
+			if distance_x < ship_radius + asteroid_radius {
 					println!("distance x was checked");
-				if distance_y < ship_radius.max(asteroid_radius) {
+				if distance_y < ship_radius + asteroid_radius {
 					println!("distance Y was checked");
 					//offset.remove(4);
 					//shape.remove(4);
@@ -364,14 +381,14 @@ impl FirstScreen {
 					//add Ship back (create limiter: if lives == 0, don't spawn and end game)
 				}
 			}
-			/*println!("this is the asteroid height {}", asteroid_height);
+			println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
 			println!("this is the ship center {:?}", ship_center);
 			println!("this is the asteroid radius {}", asteroid_radius);
 			println!("this is the asteroid center {:?}", asteroid_center);
 			println!("this is the distance x {}", distance_x);
 			println!("this is the distance y {}", distance_y);
-			println!("NEXT ASTEROID STATS");*/
+			println!("NEXT ASTEROID STATS");
 		}
 	}
 }
