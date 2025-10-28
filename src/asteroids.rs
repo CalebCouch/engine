@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use rand::thread_rng;
 use rand::distr::weighted::WeightedIndex;
+use rand::distr::Distribution;
 use std::any::Any;
 use pelican_ui::*;
 use runtime::{self, Service, ServiceList, ThreadContext, async_trait, Services};
@@ -169,36 +170,6 @@ impl Asteroid {
 			},
 		)
 	}
-
-	/*pub fn big(ctx: &mut Context) -> Self {
-		Asteroid(
-			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
-			Shape{
-				shape: ShapeType::Ellipse(5.0, (80.0, 80.0), 0.0),
-				color: Color::from_hex("#000000", 255),
-			},
-		)
-	}
-
-	pub fn medium(ctx: &mut Context) -> Self {
-		Asteroid(
-			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
-			Shape{
-				shape: ShapeType::Ellipse(5.0, (60.0, 60.0), 0.0),
-				color: Color::from_hex("#000000", 255),
-			},
-		)
-	}
-
-	pub fn small(ctx: &mut Context) -> Self {
-		Asteroid(
-			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
-			Shape{
-				shape: ShapeType::Ellipse(5.0, (40.0, 40.0), 0.0),
-				color: Color::from_hex("#000000", 255),
-			},
-		)
-	}*/
 }
 
 #[derive(Debug, Component)]
@@ -231,36 +202,41 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		self.2 = (2.0, 2.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
-		let slices = &mut canvas.0.0[1..];
+		let offset = &mut canvas.0.0[1..];
 		/*for elements in &mut *slices {
 			let asteroids = (elements.0 + self.2.0, elements.1 + self.2.0);
 			*elements = asteroids;
 		}*/
-				if slices[1] > (1000.0, 1000.0) {
-			slices[1] = (200.0, 20.0);
+				if offset[1] > (1000.0, 1000.0) {
+			offset[1] = (200.0, 20.0);
 		}
-		if slices[2] > (1000.0, 1000.0) {
-			slices[2] = (260.0, 200.0);
+		if offset[2] > (1000.0, 1000.0) {
+			offset[2] = (260.0, 200.0);
 		}
-		if slices[3] > (1000.0, 1000.0) {
-			slices[3] = (260.0, 200.0);
+		if offset[3] > (1000.0, 1000.0) {
+			offset[3] = (260.0, 200.0);
 		}
-		if slices[4] > (1000.0, 1000.0) {
-			slices[4] = (20.0, 20.0);
+		if offset[4] > (1000.0, 1000.0) {
+			offset[4] = (20.0, 20.0);
+		}
+		if self.4 == true {
+			let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
+			offset[5] = shoot;
 		}
 	} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
 			//COMPLETED: make code cleaner and less hardcoded
 			//COMPLETED: add ship movement
-			//COMPLETED: set the ship to be the center of the screen and when i hit the arrow keys move all the asteroids.
+			//HALFWAY COMPLETED: set the ship to be the center of the screen and when i hit the arrow keys move all the asteroids.
 			//HALFWAY COMPLETED: create a bumper with the score and lives
 			//HALFWAY COMPLETED: make ship shoot
 			//HALFWAY COMPLETED: add asteroid collision and splitting into smaller asteroids
-			//create a way to automatically generate asteroids. definetely going to be using .push()
+			//HALFWAY COMPLETED: create a way to automatically generate asteroids. definetely going to be using .push()
 			//create death and respawn + update score board
 			//replace shapes with sprites
 			//figure out the front facing part of our ship is
+			//add rotation
 			//get rid of the looping asteroids and push new ones automatically. use weighted index function i created to make it so the chances of each variant of asteroid are different
 			//BUGS: any named key double presses, all offsets move in the asteroid move code, including the ship's
 			self.3 = (12.0, 12.0);
@@ -271,30 +247,32 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 					//self.shoot(ctx);
 					self.collision(ctx);
 					self.generate_asteroids(ctx);
+					self.shoot(ctx);
+					self.4 = true;
 				},
 				Key::Named(NamedKey::ArrowUp) => {
-					slices[0].1 = (slices[0].1 - self.3.1);
+					//slices[0].1 = (slices[0].1 - self.3.1);
 					for elements in &mut *slices {
 						let asteroids = (elements.1 + self.2.1);
 						elements.1 = asteroids;
 					}
 				},
 				Key::Named(NamedKey::ArrowDown) => {
-					slices[0].1 = (slices[0].1 + self.3.1);
+					//slices[0].1 = (slices[0].1 + self.3.1);
 					for elements in &mut *slices {
 						let asteroids = (elements.1 - self.2.1);
 						elements.1 = asteroids;
 					}
 				},
 				Key::Named(NamedKey::ArrowRight) => {
-					slices[0].0 = (slices[0].0 + self.3.0);
+					//slices[0].0 = (slices[0].0 + self.3.0);
 					for elements in &mut *slices {
 						let asteroids = (elements.0 - self.2.1);
 						elements.0 = asteroids;
 					}
 				},
 				Key::Named(NamedKey::ArrowLeft) => {
-					slices[0].0 = (slices[0].0 - self.3.0);
+					//slices[0].0 = (slices[0].0 - self.3.0);
 					for elements in &mut *slices {
 						let asteroids = (elements.0 + self.2.1);
 						elements.0 = asteroids;
@@ -328,9 +306,8 @@ impl FirstScreen {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.3.1.shape;
+
 		offset[5] = offset[0];
-		let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
-		offset[5] = shoot;
 	}
 
 	pub fn get_size(&mut self, ctx: &mut Context) -> Vec<(f32, f32)> {
@@ -360,18 +337,30 @@ impl FirstScreen {
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.2;
 		//push offset in proportion to ship's location
-		let phrases = vec![(Asteroid::new(ctx, 80.0, 80.0), 5), (Asteroid::new(ctx, 60.0, 60.0), 5), (Asteroid::new(ctx, 40.0, 40.0), 5)];
 		let mut rng = thread_rng();
-		let weight = WeightedIndex::new(phrases.iter().map(|x| x.1)).unwrap();
-		for _ in 0..20 {
-			//println!("{}", phrases[weight.sample(&mut rng)].0);
-		}
-		offset.push((200.0, 200.0));
-		shape.push(Asteroid::new(ctx, 80.0, 80.0));
-		offset.push((100.0, 100.0));
-		shape.push(Asteroid::new(ctx, 60.0, 60.0));
-		offset.push((50.0, 50.0));
-		shape.push(Asteroid::new(ctx, 40.0, 40.0));
+		let asteroids = vec![
+			(Asteroid::new(ctx, 80.0, 80.0), 1),
+			(Asteroid::new(ctx, 60.0, 60.0), 3),
+			(Asteroid::new(ctx, 40.0, 40.0), 5),
+		];
+		let a_weight = WeightedIndex::new(asteroids.iter().map(|x| x.1)).unwrap();
+
+		let positions = vec![
+			((200.0, 200.0), 1),
+			((100.0, 100.0), 3),
+			((50.0, 50.0), 5),
+		];
+		let p_weight = WeightedIndex::new(positions.iter().map(|x| x.1)).unwrap();
+		//i could try cloning
+
+		/*offset.push(positions[p_weight.sample(&mut rng)].0);
+		shape.push(asteroids[a_weight.sample(&mut rng)].0);
+
+		offset.push(positions[p_weight.sample(&mut rng)].0);
+		shape.push(asteroids[a_weight.sample(&mut rng)].0);
+
+		offset.push(positions[p_weight.sample(&mut rng)].0);
+		shape.push(asteroids[a_weight.sample(&mut rng)].0);*/
 	}
 	pub fn collision(&mut self, ctx: &mut Context) {
 		let mut sizes = self.get_size(ctx);
