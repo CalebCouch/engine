@@ -1,4 +1,5 @@
 use rand::rng;
+use rand::Rng;
 use rand::distr::weighted::WeightedIndex;
 use rand::distr::Distribution;
 use pelican_ui::*;
@@ -95,7 +96,7 @@ impl ScoreBoard {
 			},
 			Text::new(
 				ctx,
-				"LIVES:",
+				"LIVES: 3",
 				TextStyle::Primary,
 				20.0,
 				Align::Left,
@@ -192,26 +193,29 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0[1..];
 		for elements in &mut *offset {
-			let count = //random number generator
+			//need to be able to set the new movement to that asteroid, i don't want it looping back through and changing it. 
+			let count = rand::thread_rng().gen_range(1..=4);
 			match count {
 				1 => {
-
+					let asteroids = (elements.0 + self.2.0, elements.1 + self.2.0);
+					*elements = asteroids;
 				},
 				2 => {
-
+					let asteroids = (elements.0 - self.2.0, elements.1 - self.2.0);
+					*elements = asteroids;
 				},
 				3 => {
-
+					let asteroids = (elements.0 + self.2.0, elements.1 - self.2.0);
+					*elements = asteroids;
 				},
 				4 => {
-
+					let asteroids = (elements.0 - self.2.0, elements.1 + self.2.0);
+					*elements = asteroids;
 				},
-
+				_ => {}
 			}
-			let asteroids = (elements.0 + self.2.0, elements.1 + self.2.0);
-			*elements = asteroids;
 		}
-		if offset[1] > (1000.0, 1000.0) {
+		/*if offset[1] > (1000.0, 1000.0) {
 			offset[1] = (200.0, 20.0);
 		}
 		if offset[2] > (1000.0, 1000.0) {
@@ -222,7 +226,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		}
 		if offset[4] > (1000.0, 1000.0) {
 			offset[4] = (20.0, 20.0);
-		}
+		}*/
 	} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
@@ -238,7 +242,6 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			//figure out the front facing part of our ship is
 			//add rotation
 			//get rid of the looping asteroids and push new ones automatically. use weighted index function i created to make it so the chances of each variant of asteroid are different
-			//BUGS: any named key double presses, all offsets move in the asteroid move code, including the ship's
 			self.3 = (20.0, 20.0);
 			let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 			let offset = &mut canvas.0.0;
@@ -247,7 +250,8 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 					//self.shoot(ctx);
 					self.collision(ctx);
 					self.shoot(ctx);
-					self.generate_asteroids(ctx)
+					self.generate_asteroids(ctx);
+					self.scoreboard(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					//slices[0].1 = (offset[0].1 - self.3.1);
@@ -383,7 +387,7 @@ impl FirstScreen {
 					println!("the distance was checked");
 					//offset.remove(0);
 					//shape.remove(0);
-					//println!("{}", self.1.content().find_at::<Bumper>(1).unwrap().2.2);
+					self.4 = true;
 					//collision logic: remove both the asteroid and ship. asteroid is gonna be tricky
 					//update lives
 					//create explosion component and replace Ship's position with explosion (will be just a shape for now)
@@ -397,6 +401,22 @@ impl FirstScreen {
 			println!("this is the distance x {}", distance_x);
 			println!("this is the distance y {}", distance_y);
 			println!("NEXT ASTEROID STATS");*/
+		}
+	}
+
+	pub fn scoreboard(&mut self, ctx: &mut Context) {
+		//need to be able to add +1 to text
+		//maybe we have a counter then we parse it and push it into the text
+		let mut lives_counter = 3;
+		lives_counter -= 1;
+		let mut score_counter = 0;
+		score_counter -= 1;
+
+		let lives = Text::new(ctx, "LIVES: 3", TextStyle::Primary, 50.0, Align::Left);
+		let score = Text::new(ctx, "SCORE: 0", TextStyle::Primary, 50.0, Align::Left);
+
+		if self.4 == true {
+			println!("{:?}", self.1.content().find_at::<Bumper>(1).unwrap().2.2.2);
 		}
 	}
 }
