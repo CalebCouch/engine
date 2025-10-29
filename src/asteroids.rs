@@ -167,7 +167,7 @@ impl Asteroid {
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Vec<Ship>, Vec<Asteroid>, Asteroid);
+pub struct Canvas(CanvasLayout, Vec<Ship>, Vec<Asteroid>, Asteroid, Vec<Shape>);
 impl OnEvent for Canvas {}
 
 //move ship to front
@@ -178,6 +178,7 @@ impl Canvas {
 			vec![Ship::new(ctx)],
 			vec![Asteroid::new(ctx, 80.0, 80.0), Asteroid::new(ctx, 60.0, 60.0), Asteroid::new(ctx, 40.0, 40.0), Asteroid::new(ctx, 60.0, 60.0)],
 			Asteroid::new(ctx, 40.0, 40.0),
+			vec![],
 		)
     }
 }
@@ -229,7 +230,6 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 				Key::Named(NamedKey::Space) => {
 					//self.shoot(ctx);
 					self.collision(ctx);
-					self.generate_asteroids(ctx);
 					self.shoot(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
@@ -317,18 +317,19 @@ impl FirstScreen {
 	pub fn generate_asteroids(&mut self, ctx: &mut Context) {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
-		let shape = &mut canvas.2;
+		let shape = &mut canvas.4;
 		let mut rng = rng();
+		//
 		let asteroids = vec![
-			(Asteroid::new(ctx, 80.0, 80.0), 1),
-			(Asteroid::new(ctx, 60.0, 60.0), 3),
-			(Asteroid::new(ctx, 40.0, 40.0), 5),
+			(Shape{shape: ShapeType::Ellipse(5.0, (80.0, 80.0), 0.0), color: Color::from_hex("#000000", 255)}, 1),
+			(Shape{shape: ShapeType::Ellipse(5.0, (60.0, 60.0), 0.0), color: Color::from_hex("#000000", 255)}, 3),
+			(Shape{shape: ShapeType::Ellipse(5.0, (40.0, 40.0), 0.0), color: Color::from_hex("#000000", 255)}, 5),
 		];
 		let a_weight = WeightedIndex::new(asteroids.iter().map(|x| x.1)).unwrap();
 
 		let positions = vec![
-			((200.0, 200.0), 1),
-			((100.0, 100.0), 3),
+			((200.0, 200.0), 5),
+			((100.0, 100.0), 5),
 			((50.0, 50.0), 5),
 		];
 		let p_weight = WeightedIndex::new(positions.iter().map(|x| x.1)).unwrap();
@@ -363,6 +364,7 @@ impl FirstScreen {
 					println!("the distance was checked");
 					//offset.remove(0);
 					//shape.remove(0);
+					//println!("{}", self.1.content().find_at::<Bumper>(1).unwrap().2.2);
 					//collision logic: remove both the asteroid and ship. asteroid is gonna be tricky
 					//update lives
 					//create explosion component and replace Ship's position with explosion (will be just a shape for now)
