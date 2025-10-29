@@ -192,10 +192,26 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0[1..];
 		for elements in &mut *offset {
+			let count = //random number generator
+			match count {
+				1 => {
+
+				},
+				2 => {
+
+				},
+				3 => {
+
+				},
+				4 => {
+
+				},
+
+			}
 			let asteroids = (elements.0 + self.2.0, elements.1 + self.2.0);
 			*elements = asteroids;
 		}
-				if offset[1] > (1000.0, 1000.0) {
+		if offset[1] > (1000.0, 1000.0) {
 			offset[1] = (200.0, 20.0);
 		}
 		if offset[2] > (1000.0, 1000.0) {
@@ -231,6 +247,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 					//self.shoot(ctx);
 					self.collision(ctx);
 					self.shoot(ctx);
+					self.generate_asteroids(ctx)
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					//slices[0].1 = (offset[0].1 - self.3.1);
@@ -328,9 +345,11 @@ impl FirstScreen {
 		let a_weight = WeightedIndex::new(asteroids.iter().map(|x| x.1)).unwrap();
 
 		let positions = vec![
-			((200.0, 200.0), 5),
-			((100.0, 100.0), 5),
-			((50.0, 50.0), 5),
+			((-50.0, -50.0), 5),
+			((40.0, -50.0), 5),
+			((80.0, -50.0), 5),
+			((120.0, -100.0), 5),
+			//((50.0, 50.0), 5),
 		];
 		let p_weight = WeightedIndex::new(positions.iter().map(|x| x.1)).unwrap();
 		//i could try cloning
