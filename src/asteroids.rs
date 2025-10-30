@@ -367,6 +367,7 @@ impl FirstScreen {
 		offset.push(positions[p_weight.sample(&mut rng)].0);
 		shape.push(asteroids[a_weight.sample(&mut rng)].0);
 	}
+
 	pub fn collision(&mut self, ctx: &mut Context) {
 		let sizes = self.get_size(ctx);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
@@ -387,10 +388,8 @@ impl FirstScreen {
 			let radii = ship_radius + asteroid_radius;
 			if distance_x < radii && distance_y < radii {
 					println!("collision detected");
-					offset.remove(0);
+					shape.remove(index + 1);
 					offset.remove(index + 1);
-					shape.remove(index);
-					ship_shape.remove(0);
 					self.4 = true;
 					//collision logic: remove both the asteroid and ship. asteroid is gonna be tricky
 					//update lives
@@ -405,6 +404,13 @@ impl FirstScreen {
 			println!("this is the distance x {}", distance_x);
 			println!("this is the distance y {}", distance_y);
 			println!("NEXT ASTEROID STATS");
+		}
+		if self.4 == true {
+			offset.remove(0);
+			ship_shape.remove(0);
+			self.4 = false;
+			offset.insert(0, (160.0, 200.0))
+			
 		}
 	}
 
