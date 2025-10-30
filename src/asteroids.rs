@@ -75,12 +75,12 @@ impl ScoreBoard {
 		ScoreBoard(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Rectangle(0.0, (80.0, 55.0), 0.0),
+				shape: ShapeType::Rectangle(0.0, (90.0, 55.0), 0.0),
 				color: Color::from_hex("#FFFFFF", 255),
 			},
 			Text::new(
 				ctx,
-				"SCORE:",
+				"SCORE: 0",
 				TextStyle::Primary,
 				20.0,
 				Align::Left,
@@ -91,7 +91,7 @@ impl ScoreBoard {
 		ScoreBoard(
 			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			Shape{
-				shape: ShapeType::Rectangle(0.0, (80.0, 55.0), 0.0),
+				shape: ShapeType::Rectangle(0.0, (90.0, 55.0), 0.0),
 				color: Color::from_hex("#FFFFFF", 255),
 			},
 			Text::new(
@@ -192,7 +192,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		self.2 = (2.0, 2.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0[1..];
-		for elements in &mut *offset {
+		/*for elements in &mut *offset {
 			//need to be able to set the new movement to that asteroid, i don't want it looping back through and changing it. 
 			let count = rand::thread_rng().gen_range(1..=4);
 			match count {
@@ -214,7 +214,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 				},
 				_ => {}
 			}
-		}
+		}*/
 		/*if offset[1] > (1000.0, 1000.0) {
 			offset[1] = (200.0, 20.0);
 		}
@@ -249,9 +249,9 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 				Key::Named(NamedKey::Space) => {
 					//self.shoot(ctx);
 					self.collision(ctx);
-					self.shoot(ctx);
-					self.generate_asteroids(ctx);
-					self.scoreboard(ctx);
+					//self.get_size(ctx);
+					//self.generate_asteroids(ctx);
+					//self.scoreboard(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					//slices[0].1 = (offset[0].1 - self.3.1);
@@ -319,7 +319,8 @@ impl FirstScreen {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let shape = &mut canvas.2;
 		let mut store: Vec<(f32, f32)> = vec![];
-		for elements in &mut shape.iter() {
+		for elements in &mut shape[0..] {
+			//println!("{:?}", elements);
 			match elements.1.shape {
 				ShapeType::Ellipse(_stroke_width, (width, height), _rotation) => {
 					store.push((width, height));
@@ -356,7 +357,6 @@ impl FirstScreen {
 			//((50.0, 50.0), 5),
 		];
 		let p_weight = WeightedIndex::new(positions.iter().map(|x| x.1)).unwrap();
-		//i could try cloning
 
 		offset.push(positions[p_weight.sample(&mut rng)].0);
 		shape.push(asteroids[a_weight.sample(&mut rng)].0);
@@ -371,6 +371,8 @@ impl FirstScreen {
 		let sizes = self.get_size(ctx);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
+		let ship_shape = &mut canvas.1;
+		let shape = &mut canvas.2;
 		//let shape = &mut canvas.1;
 		for (index, (asteroid_height, asteroid_width)) in sizes.iter().enumerate() {
 			let ship_radius: f32 = 27.5;
@@ -378,29 +380,31 @@ impl FirstScreen {
 			let ship_center = (offset[0].0 + ship_size.0 / 2.0, offset[0].1 + ship_size.1 / 2.0);
 
 			let asteroid_radius = asteroid_height / 2.0;
-			let asteroid_center = (offset[index].0 + asteroid_height / 2.0, offset[index].1 + asteroid_width / 2.0);
+			let asteroid_center = (offset[index + 1].0 + asteroid_height / 2.0, offset[index + 1].1 + asteroid_width / 2.0);
 
 			let distance_x = (ship_center.0 - asteroid_center.0).abs();
 			let distance_y = (ship_center.1 - asteroid_center.1).abs();
 			let radii = ship_radius + asteroid_radius;
 			if distance_x < radii && distance_y < radii {
-					println!("the distance was checked");
-					//offset.remove(0);
-					//shape.remove(0);
+					println!("collision detected");
+					offset.remove(0);
+					offset.remove(index + 1);
+					shape.remove(index);
+					ship_shape.remove(0);
 					self.4 = true;
 					//collision logic: remove both the asteroid and ship. asteroid is gonna be tricky
 					//update lives
 					//create explosion component and replace Ship's position with explosion (will be just a shape for now)
 					//add Ship back (create limiter: if lives == 0, don't spawn and end game)
 			}
-			/*println!("this is the asteroid height {}", asteroid_height);
+			println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
 			println!("this is the ship center {:?}", ship_center);
 			println!("this is the asteroid radius {}", asteroid_radius);
 			println!("this is the asteroid center {:?}", asteroid_center);
 			println!("this is the distance x {}", distance_x);
 			println!("this is the distance y {}", distance_y);
-			println!("NEXT ASTEROID STATS");*/
+			println!("NEXT ASTEROID STATS");
 		}
 	}
 
@@ -416,7 +420,7 @@ impl FirstScreen {
 		let score = Text::new(ctx, "SCORE: 0", TextStyle::Primary, 50.0, Align::Left);
 
 		if self.4 == true {
-			println!("{:?}", self.1.content().find_at::<Bumper>(1).unwrap().2.2.2);
+			//println!("{:?}", self.1.content().find_at::<Bumper>(1).unwrap().2.2.2);
 		}
 	}
 }
