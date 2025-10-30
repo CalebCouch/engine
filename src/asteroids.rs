@@ -185,7 +185,7 @@ impl Canvas {
 }
 
 #[derive(Debug, Component)]
-pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32), #[skip] bool);
+pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32), #[skip] bool, #[skip] u32, #[skip] u32);
 impl OnEvent for FirstScreen {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	if let Some(_tick_event) = event.downcast_ref::<TickEvent>() {
@@ -193,7 +193,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0[1..];
 		/*for elements in &mut *offset {
-			//need to be able to set the new movement to that asteroid, i don't want it looping back through and changing it. 
+			//need to be able to set the new movement to that asteroid, i don't want it looping back through and changing it.
 			let count = rand::thread_rng().gen_range(1..=4);
 			match count {
 				1 => {
@@ -237,11 +237,10 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			//HALFWAY COMPLETED: make ship shoot
 			//HALFWAY COMPLETED: add asteroid collision and splitting into smaller asteroids
 			//HALFWAY COMPLETED: create a way to automatically generate asteroids. definetely going to be using .push()
-			//create death and respawn + update score board
-			//replace shapes with sprites
+			//HALFWAY COMPLETED: create death and respawn + update score board
 			//figure out the front facing part of our ship is
 			//add rotation
-			//get rid of the looping asteroids and push new ones automatically. use weighted index function i created to make it so the chances of each variant of asteroid are different
+			//ABANDONED: replace shapes with sprites
 			self.3 = (20.0, 20.0);
 			let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 			let offset = &mut canvas.0.0;
@@ -249,9 +248,8 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 				Key::Named(NamedKey::Space) => {
 					//self.shoot(ctx);
 					self.collision(ctx);
-					//self.get_size(ctx);
 					//self.generate_asteroids(ctx);
-					//self.scoreboard(ctx);
+					self.scoreboard(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					//slices[0].1 = (offset[0].1 - self.3.1);
@@ -301,7 +299,7 @@ impl FirstScreen {
 		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)), Box::new(Bumper::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
-		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0), false)
+		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0), false, 3, 0)
     }
 
 	pub fn shoot(&mut self, _ctx: &mut Context) {
@@ -396,38 +394,40 @@ impl FirstScreen {
 					//create explosion component and replace Ship's position with explosion (will be just a shape for now)
 					//add Ship back (create limiter: if lives == 0, don't spawn and end game)
 			}
-			println!("this is the asteroid height {}", asteroid_height);
+			/*println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
 			println!("this is the ship center {:?}", ship_center);
 			println!("this is the asteroid radius {}", asteroid_radius);
 			println!("this is the asteroid center {:?}", asteroid_center);
 			println!("this is the distance x {}", distance_x);
 			println!("this is the distance y {}", distance_y);
-			println!("NEXT ASTEROID STATS");
+			println!("NEXT ASTEROID STATS");*/
 		}
 		if self.4 == true {
 			offset.remove(0);
 			ship_shape.remove(0);
-			self.4 = false;
-			offset.insert(0, (160.0, 200.0))
-			
+			println!("{}", self.5);
+			println!("{}", self.6);
+			if self.5 > 0 {
+				offset.insert(0, (160.0, 200.0));
+				ship_shape.insert(0, Ship::new(ctx));
+			}
 		}
 	}
 
 	pub fn scoreboard(&mut self, ctx: &mut Context) {
 		//need to be able to add +1 to text
 		//maybe we have a counter then we parse it and push it into the text
-		let mut lives_counter = 3;
-		lives_counter -= 1;
-		let mut score_counter = 0;
-		score_counter -= 1;
+		self.5 -= 1;
+		self.6 += 1;
+		let convert = self.5.to_string();
+		let insert = "LIVES: ";
+		insert.push_str(convert);
+		let lives = Text::new(ctx, "LIVES:", TextStyle::Primary, 20.0, Align::Left);
+		let score = Text::new(ctx, "SCORE: self.6", TextStyle::Primary, 20.0, Align::Left);
 
-		let lives = Text::new(ctx, "LIVES: 3", TextStyle::Primary, 50.0, Align::Left);
-		let score = Text::new(ctx, "SCORE: 0", TextStyle::Primary, 50.0, Align::Left);
-
-		if self.4 == true {
-			//println!("{:?}", self.1.content().find_at::<Bumper>(1).unwrap().2.2.2);
-		}
+		println!("{:?}", self.1.content().find_at::<Bumper>(1).unwrap().2.2.2);
+		self.1.content().find_at::<Bumper>(1).unwrap().2.2.2 = lives;
 	}
 }
 
