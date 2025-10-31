@@ -168,17 +168,17 @@ impl Asteroid {
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Vec<Ship>, Vec<Asteroid>, Asteroid, Vec<Shape>);
+pub struct Canvas(CanvasLayout, Vec<Ship>, Vec<Asteroid>, /*Asteroid,*/ Vec<Shape>);
 impl OnEvent for Canvas {}
 
 //move ship to front
 impl Canvas {
     pub fn new(ctx: &mut Context) -> Self {
         Canvas(
-			CanvasLayout(vec![(160.0, 200.0), (300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ (-200.0, -200.0)]),
+			CanvasLayout(vec![(160.0, 200.0), (300.0, 300.0), (20.0, 20.0), /*(140.0, 100.0),*/ (200.0, 20.0), (260.0, 200.0), /*(320.0, 120.0),*/ /*(-200.0, -200.0)*/]),
 			vec![Ship::new(ctx)],
 			vec![Asteroid::new(ctx, 80.0, 80.0), Asteroid::new(ctx, 60.0, 60.0), Asteroid::new(ctx, 40.0, 40.0), Asteroid::new(ctx, 60.0, 60.0)],
-			Asteroid::new(ctx, 40.0, 40.0),
+			/*Asteroid::new(ctx, 40.0, 40.0),*/
 			vec![],
 		)
     }
@@ -214,18 +214,6 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 				},
 				_ => {}
 			}
-		}*/
-		/*if offset[1] > (1000.0, 1000.0) {
-			offset[1] = (200.0, 20.0);
-		}
-		if offset[2] > (1000.0, 1000.0) {
-			offset[2] = (260.0, 200.0);
-		}
-		if offset[3] > (1000.0, 1000.0) {
-			offset[3] = (260.0, 200.0);
-		}
-		if offset[4] > (1000.0, 1000.0) {
-			offset[4] = (20.0, 20.0);
 		}*/
 	} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
@@ -337,7 +325,7 @@ impl FirstScreen {
 	pub fn generate_asteroids(&mut self, ctx: &mut Context) {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
-		let shape = &mut canvas.4;
+		let shape = &mut canvas.3;
 		let mut rng = rng();
 		//
 		let asteroids = vec![
@@ -386,12 +374,12 @@ impl FirstScreen {
 			let radii = ship_radius + asteroid_radius;
 			if distance_x < radii && distance_y < radii {
 					println!("collision detected");
-					shape.remove(index + 1);
-					offset.remove(index + 1);
+					offset.remove(index.checked_sub(1).expect("yuh2"));
+					shape.remove(index.checked_sub(1).expect("yuh"));
+					println!("{}", index);
+					//index is backwards? also, shouldn't it be checking for
 					self.4 = true;
-					//collision logic: remove both the asteroid and ship. asteroid is gonna be tricky
-					//update lives
-					//create explosion component and replace Ship's position with explosion (will be just a shape for now)
+					//vec is shifting causes errors
 					//add Ship back (create limiter: if lives == 0, don't spawn and end game)
 			}
 			/*println!("this is the asteroid height {}", asteroid_height);
@@ -404,30 +392,38 @@ impl FirstScreen {
 			println!("NEXT ASTEROID STATS");*/
 		}
 		if self.4 == true {
-			offset.remove(0);
+			/*offset.remove(0);
 			ship_shape.remove(0);
 			println!("{}", self.5);
 			println!("{}", self.6);
 			if self.5 > 0 {
 				offset.insert(0, (160.0, 200.0));
 				ship_shape.insert(0, Ship::new(ctx));
-			}
+				println!("{:?}", offset[0]);*/
+			//}
 		}
 	}
 
 	pub fn scoreboard(&mut self, ctx: &mut Context) {
 		//need to be able to add +1 to text
 		//maybe we have a counter then we parse it and push it into the text
+		if self.5 != 0 {
 		self.5 -= 1;
+		}
 		self.6 += 1;
-		let convert = self.5.to_string();
-		let insert = "LIVES: ";
-		insert.push_str(convert);
-		let lives = Text::new(ctx, "LIVES:", TextStyle::Primary, 20.0, Align::Left);
-		let score = Text::new(ctx, "SCORE: self.6", TextStyle::Primary, 20.0, Align::Left);
+		let num_lives = self.5.to_string();
+		let mut insert_lives = String::from("LIVES: ");
+		insert_lives.push_str(&num_lives);
+		let num_score = self.6.to_string();
+		let mut insert_score = String::from("SCORE: ");
+		insert_score.push_str(&num_score);
 
-		println!("{:?}", self.1.content().find_at::<Bumper>(1).unwrap().2.2.2);
-		self.1.content().find_at::<Bumper>(1).unwrap().2.2.2 = lives;
+		let update_lives = Text::new(ctx, &insert_lives, TextStyle::Primary, 20.0, Align::Left);
+		let update_score = Text::new(ctx, &insert_score, TextStyle::Primary, 20.0, Align::Left);
+
+		//println!("{:?}", self.1.content().find_at::<Bumper>(1).unwrap().2.2.2);
+		self.1.content().find_at::<Bumper>(1).unwrap().2.2.2 = update_lives;
+		self.1.content().find_at::<Bumper>(1).unwrap().2.1.2 = update_score;
 	}
 }
 
