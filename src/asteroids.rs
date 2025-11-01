@@ -361,30 +361,27 @@ impl FirstScreen {
 		let ship_shape = &mut canvas.1;
 		let shape = &mut canvas.2;
 		//index is severly fucked and arbitrary.
-		let removed_offsets: Vec<T> = Vec::new();
-		let removed_shapes: Vec<T> = Vec::new();
-		for (index, (asteroid_height, asteroid_width)) in sizes.iter().enumerate() {
+		for (index, ((asteroid_height, asteroid_width), asteroid_index)) in sizes.iter().zip(&offset[1..]).enumerate() {
 			println!("{:?}", index);
 			let ship_radius: f32 = 27.5;
 			let ship_size: (f32, f32) = (55.0, 55.0);
 			let ship_center = (offset[0].0 + ship_size.0 / 2.0, offset[0].1 + ship_size.1 / 2.0);
 
 			let asteroid_radius = asteroid_height / 2.0;
-			let asteroid_center = (offset[index + 1].0 + asteroid_height / 2.0, offset[index + 1].1 + asteroid_width / 2.0);
+			let asteroid_center = (asteroid_index.0 + asteroid_height / 2.0, asteroid_index.1 + asteroid_width / 2.0);
 
 			let distance_x = (ship_center.0 - asteroid_center.0).abs();
 			let distance_y = (ship_center.1 - asteroid_center.1).abs();
 			let radii = ship_radius + asteroid_radius;
 			if distance_x < radii && distance_y < radii {
 				println!("collision detected");
-				offset.remove(index + 1);
-				shape.remove(index + 1);
+				offset.remove(index);
+				shape.remove(index);
 				//index is backwards? also, shouldn't it be checking for
 				self.4 = true;
 				//vec is shifting causes errors
 				//add Ship back (create limiter: if lives == 0, don't spawn and end game)
 			}
-			for 
 
 			/*println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
@@ -398,8 +395,6 @@ impl FirstScreen {
 		if self.4 == true {
 			offset.remove(0);
 			ship_shape.remove(0);
-			println!("{}", self.5);
-			println!("{}", self.6);
 			if self.5 > 0 {
 				offset.insert(0, (160.0, 200.0));
 				ship_shape.insert(0, Ship::new(ctx));
