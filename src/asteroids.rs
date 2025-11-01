@@ -191,7 +191,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	if let Some(_tick_event) = event.downcast_ref::<TickEvent>() {
 		self.2 = (2.0, 2.0);
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
-		let offset = &mut canvas.0.0[1..];
+		//let offset = &mut canvas.0.0[1..];
 		/*for elements in &mut *offset {
 			//need to be able to set the new movement to that asteroid, i don't want it looping back through and changing it.
 			let count = rand::thread_rng().gen_range(1..=4);
@@ -361,6 +361,7 @@ impl FirstScreen {
 		let ship_shape = &mut canvas.1;
 		let shape = &mut canvas.2;
 		//index is severly fucked and arbitrary.
+		let mut remove_elements = vec![];
 		for (index, ((asteroid_height, asteroid_width), asteroid_index)) in sizes.iter().zip(&offset[1..]).enumerate() {
 			println!("{:?}", index);
 			let ship_radius: f32 = 27.5;
@@ -375,12 +376,8 @@ impl FirstScreen {
 			let radii = ship_radius + asteroid_radius;
 			if distance_x < radii && distance_y < radii {
 				println!("collision detected");
-				offset.remove(index);
-				shape.remove(index);
-				//index is backwards? also, shouldn't it be checking for
+				remove_elements.push(index + 1);
 				self.4 = true;
-				//vec is shifting causes errors
-				//add Ship back (create limiter: if lives == 0, don't spawn and end game)
 			}
 
 			/*println!("this is the asteroid height {}", asteroid_height);
@@ -392,13 +389,16 @@ impl FirstScreen {
 			println!("this is the distance y {}", distance_y);
 			println!("NEXT ASTEROID STATS");*/
 		}
+		for &i in remove_elements.iter().rev() {
+			shape.remove(i.checked_sub(1).unwrap());
+			offset.remove(i.checked_sub(1).unwrap());
+		}
 		if self.4 == true {
 			offset.remove(0);
 			ship_shape.remove(0);
 			if self.5 > 0 {
 				offset.insert(0, (160.0, 200.0));
 				ship_shape.insert(0, Ship::new(ctx));
-				println!("{:?}", offset[0]);
 			}
 		}
 	}
