@@ -241,31 +241,39 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					//slices[0].1 = (offset[0].1 - self.3.1);
-					for elements in &mut offset[1..] {
+					/*for elements in &mut offset[1..] {
 						let asteroids = elements.1 + self.3.1;
 						elements.1 = asteroids;
-					}
+					}*/
+					let asteroids = offset[0].1 - self.3.1;
+					offset[0].1 = asteroids;
 				},
 				Key::Named(NamedKey::ArrowDown) => {
 					//slices[0].1 = (offset[0].1 + self.3.1);
-					for elements in &mut offset[1..] {
+					/*for elements in &mut offset[1..] {
 						let asteroids = elements.1 - self.3.1;
 						elements.1 = asteroids;
-					}
+					}*/
+					let asteroids = offset[0].1 + self.3.1;
+					offset[0].1 = asteroids;
 				},
 				Key::Named(NamedKey::ArrowRight) => {
 					//slices[0].0 = (offset[0].0 + self.3.0);
-					for elements in &mut offset[1..] {
+					/*for elements in &mut offset[1..] {
 						let asteroids = elements.0 - self.3.1;
 						elements.0 = asteroids;
-					}
+					}*/
+					let asteroids = offset[0].0 + self.3.1;
+					offset[0].0 = asteroids;
 				},
 				Key::Named(NamedKey::ArrowLeft) => {
 					//slices[0].0 = (offset[0].0 - self.3.0);
-					for elements in &mut offset[1..] {
+					/*for elements in &mut offset[1..] {
 						let asteroids = elements.0 + self.3.1;
 						elements.0 = asteroids;
-					}
+					}*/
+					let asteroids = offset[0].0 - self.3.1;
+					offset[0].0 = asteroids;
 				}
 				_ => {
 					println!("wrong key press?");
@@ -378,8 +386,9 @@ impl FirstScreen {
 				println!("collision detected");
 				remove_elements.push(index + 1);
 				self.4 = true;
+				//so if we remove a higher index of Asteroids, it moves the index that is 1 less to that higher index's to the higher index's position. ex: delete 4- 4 shape is deleted and 3's shape takes 4's old position. it must delete 3's offset then
 			}
-
+			println!("{:?}", offset[3]);
 			/*println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
 			println!("this is the ship center {:?}", ship_center);
@@ -389,9 +398,11 @@ impl FirstScreen {
 			println!("this is the distance y {}", distance_y);
 			println!("NEXT ASTEROID STATS");*/
 		}
-		for &i in remove_elements.iter().rev() {
+		for &i in remove_elements.iter() {
+			let offset_add = i + 1;
 			shape.remove(i.checked_sub(1).unwrap());
-			offset.remove(i.checked_sub(1).unwrap());
+			offset.remove(offset_add.checked_sub(1).unwrap());
+			//so we know that if we hardcode 4 in, it'll not shift 3's shape into its position. so why is it deleting 3's index instead of 4's?
 		}
 		if self.4 == true {
 			offset.remove(0);
