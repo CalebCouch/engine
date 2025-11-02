@@ -1,5 +1,4 @@
 use rand::rng;
-use rand::Rng;
 use rand::distr::weighted::WeightedIndex;
 use rand::distr::Distribution;
 use pelican_ui::*;
@@ -168,7 +167,7 @@ impl Asteroid {
 }
 
 #[derive(Debug, Component)]
-pub struct Canvas(CanvasLayout, Vec<Ship>, Vec<Asteroid>, /*Asteroid,*/ Vec<Shape>);
+pub struct Canvas(CanvasLayout, Vec<Ship>, Vec<Asteroid>, /*Asteroid,*/);
 impl OnEvent for Canvas {}
 
 //move ship to front
@@ -179,7 +178,6 @@ impl Canvas {
 			vec![Ship::new(ctx)],
 			vec![Asteroid::new(ctx, 80.0, 80.0), Asteroid::new(ctx, 60.0, 60.0), Asteroid::new(ctx, 40.0, 40.0), Asteroid::new(ctx, 60.0, 60.0)],
 			/*Asteroid::new(ctx, 40.0, 40.0),*/
-			vec![],
 		)
     }
 }
@@ -215,6 +213,7 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 				_ => {}
 			}
 		}*/
+		self.collision(ctx);
 	} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
@@ -235,45 +234,32 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			match my_key {
 				Key::Named(NamedKey::Space) => {
 					//self.shoot(ctx);
-					self.collision(ctx);
 					//self.generate_asteroids(ctx);
-					self.scoreboard(ctx);
+					self.generate_asteroids(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
-					//slices[0].1 = (offset[0].1 - self.3.1);
-					/*for elements in &mut offset[1..] {
+					for elements in &mut offset[1..] {
 						let asteroids = elements.1 + self.3.1;
 						elements.1 = asteroids;
-					}*/
-					let asteroids = offset[0].1 - self.3.1;
-					offset[0].1 = asteroids;
+					}
 				},
 				Key::Named(NamedKey::ArrowDown) => {
-					//slices[0].1 = (offset[0].1 + self.3.1);
-					/*for elements in &mut offset[1..] {
+					for elements in &mut offset[1..] {
 						let asteroids = elements.1 - self.3.1;
 						elements.1 = asteroids;
-					}*/
-					let asteroids = offset[0].1 + self.3.1;
-					offset[0].1 = asteroids;
+					}
 				},
 				Key::Named(NamedKey::ArrowRight) => {
-					//slices[0].0 = (offset[0].0 + self.3.0);
-					/*for elements in &mut offset[1..] {
+					for elements in &mut offset[1..] {
 						let asteroids = elements.0 - self.3.1;
 						elements.0 = asteroids;
-					}*/
-					let asteroids = offset[0].0 + self.3.1;
-					offset[0].0 = asteroids;
+					}
 				},
 				Key::Named(NamedKey::ArrowLeft) => {
-					//slices[0].0 = (offset[0].0 - self.3.0);
-					/*for elements in &mut offset[1..] {
+					for elements in &mut offset[1..] {
 						let asteroids = elements.0 + self.3.1;
 						elements.0 = asteroids;
-					}*/
-					let asteroids = offset[0].0 - self.3.1;
-					offset[0].0 = asteroids;
+					}
 				}
 				_ => {
 					println!("wrong key press?");
@@ -333,13 +319,13 @@ impl FirstScreen {
 	pub fn generate_asteroids(&mut self, ctx: &mut Context) {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
-		let shape = &mut canvas.3;
+		let shape = &mut canvas.2;
 		let mut rng = rng();
 		//
 		let asteroids = vec![
-			(Shape{shape: ShapeType::Ellipse(5.0, (80.0, 80.0), 0.0), color: Color::from_hex("#000000", 255)}, 1),
-			(Shape{shape: ShapeType::Ellipse(5.0, (60.0, 60.0), 0.0), color: Color::from_hex("#000000", 255)}, 3),
-			(Shape{shape: ShapeType::Ellipse(5.0, (40.0, 40.0), 0.0), color: Color::from_hex("#000000", 255)}, 5),
+			(Asteroid::new(ctx, 80.0, 80.0), 1),
+			(Asteroid::new(ctx, 60.0, 60.0), 3),
+			(Asteroid::new(ctx, 40.0, 40.0), 5),
 		];
 		let a_weight = WeightedIndex::new(asteroids.iter().map(|x| x.1)).unwrap();
 
@@ -352,14 +338,14 @@ impl FirstScreen {
 		];
 		let p_weight = WeightedIndex::new(positions.iter().map(|x| x.1)).unwrap();
 
-		offset.push(positions[p_weight.sample(&mut rng)].0);
+		/*offset.push(positions[p_weight.sample(&mut rng)].0);
 		shape.push(asteroids[a_weight.sample(&mut rng)].0);
 
 		offset.push(positions[p_weight.sample(&mut rng)].0);
 		shape.push(asteroids[a_weight.sample(&mut rng)].0);
 
 		offset.push(positions[p_weight.sample(&mut rng)].0);
-		shape.push(asteroids[a_weight.sample(&mut rng)].0);
+		shape.push(asteroids[a_weight.sample(&mut rng)].0);*/
 	}
 
 	pub fn collision(&mut self, ctx: &mut Context) {
@@ -385,10 +371,9 @@ impl FirstScreen {
 			if distance_x < radii && distance_y < radii {
 				println!("collision detected");
 				remove_elements.push(index + 1);
+				self.scoreboard(ctx);
 				self.4 = true;
-				//so if we remove a higher index of Asteroids, it moves the index that is 1 less to that higher index's to the higher index's position. ex: delete 4- 4 shape is deleted and 3's shape takes 4's old position. it must delete 3's offset then
 			}
-			println!("{:?}", offset[3]);
 			/*println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
 			println!("this is the ship center {:?}", ship_center);
@@ -399,6 +384,7 @@ impl FirstScreen {
 			println!("NEXT ASTEROID STATS");*/
 		}
 		for &i in remove_elements.iter() {
+			//add one to the index of offset because it's always behind 1 for some reason
 			let offset_add = i + 1;
 			shape.remove(i.checked_sub(1).unwrap());
 			offset.remove(offset_add.checked_sub(1).unwrap());
@@ -418,7 +404,7 @@ impl FirstScreen {
 		//need to be able to add +1 to text
 		//maybe we have a counter then we parse it and push it into the text
 		if self.5 != 0 {
-		self.5 -= 1;
+			self.5 -= 1;
 		}
 		self.6 += 1;
 		let num_lives = self.5.to_string();
