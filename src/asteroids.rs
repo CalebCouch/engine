@@ -183,7 +183,7 @@ impl Canvas {
 }
 
 #[derive(Debug, Component)]
-pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32), #[skip] bool, #[skip] u32, #[skip] u32);
+pub struct FirstScreen(Stack, Page, #[skip] (f32, f32), #[skip] (f32, f32), #[skip] bool, #[skip] u32, #[skip] u32, #[skip] bool);
 impl OnEvent for FirstScreen {
 fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 	if let Some(_tick_event) = event.downcast_ref::<TickEvent>() {
@@ -214,17 +214,18 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			}
 		}*/
 		self.collision(ctx);
+		self.update_scoreboard(ctx);
 	} else if let Some(KeyboardEvent{key: my_key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			//TODO:
 			//COMPLETED: so maybe we have the asteroids loop back through if they reach a certain number. we'll try this for now and add a better system later since we'll be moving with our ship.
 			//COMPLETED: make code cleaner and less hardcoded
 			//COMPLETED: add ship movement
 			//COMPLETED: set the ship to be the center of the screen and when i hit the arrow keys move all the asteroids.
-			//HALFWAY COMPLETED: create a bumper with the score and lives
+			//COMPLETED: create a bumper with the score and lives
+			//COMPLETED: create death and respawn + update score board
 			//HALFWAY COMPLETED: make ship shoot
 			//HALFWAY COMPLETED: add asteroid collision and splitting into smaller asteroids
 			//HALFWAY COMPLETED: create a way to automatically generate asteroids. definetely going to be using .push()
-			//HALFWAY COMPLETED: create death and respawn + update score board
 			//figure out the front facing part of our ship is
 			//add rotation
 			//ABANDONED: replace shapes with sprites
@@ -233,9 +234,9 @@ fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
 			let offset = &mut canvas.0.0;
 			match my_key {
 				Key::Named(NamedKey::Space) => {
-					//self.shoot(ctx);
+					self.shoot(ctx);
 					//self.generate_asteroids(ctx);
-					self.generate_asteroids(ctx);
+					//self.generate_asteroids(ctx);
 				},
 				Key::Named(NamedKey::ArrowUp) => {
 					for elements in &mut offset[1..] {
@@ -281,17 +282,20 @@ impl FirstScreen {
 		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Canvas::new(ctx)), Box::new(Bumper::new(ctx))];
 		let content = Content::new(ctx, Offset::Center, children);
 		let header = Header::home(ctx, "Canvas", None);
-		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0), false, 3, 0)
+		FirstScreen(Stack::default(), Page::new(Some(header), content, None), (0.0, 0.0), (0.0, 0.0), false, 3, 0, false)
     }
 
-	pub fn shoot(&mut self, _ctx: &mut Context) {
-		self.2 = (2.0, 2.0);
+	pub fn shoot(&mut self, ctx: &mut Context) {
 		let canvas = self.1.content().find_at::<Canvas>(0).unwrap();
 		let offset = &mut canvas.0.0;
-		//let shape = &mut canvas.3.1.shape;
-		offset[5] = offset[0];
+		let shape = &mut canvas.2;
+		//we need to push to Vec<Asteroids> but when we create our new move code we gotta be careful it doesn't affect our bullets
+		//need to be able to keep track of our bullets
+		offset.push((offset[0].0, offset[0].1 - 50.0));
+		shape.push(Asteroid::new(ctx, 40.0, 40.0));
+		/*offset[5] = offset[0].1 + 4.0;
 		let shoot = (offset[5].0 + self.2.0, offset[5].1 + self.2.1);
-		offset[5] = shoot;
+		offset[5] = shoot;*/
 
 	}
 
@@ -321,7 +325,7 @@ impl FirstScreen {
 		let offset = &mut canvas.0.0;
 		let shape = &mut canvas.2;
 		let mut rng = rng();
-		//
+		//so my idea is make these shapes then pass them as arguments to the Asteroid component? it should theoretically
 		let asteroids = vec![
 			(Asteroid::new(ctx, 80.0, 80.0), 1),
 			(Asteroid::new(ctx, 60.0, 60.0), 3),
@@ -371,8 +375,8 @@ impl FirstScreen {
 			if distance_x < radii && distance_y < radii {
 				println!("collision detected");
 				remove_elements.push(index + 1);
-				self.scoreboard(ctx);
 				self.4 = true;
+				self.7 = true;
 			}
 			/*println!("this is the asteroid height {}", asteroid_height);
 			println!("this is the asteroid width {}", asteroid_width);
@@ -397,6 +401,13 @@ impl FirstScreen {
 				offset.insert(0, (160.0, 200.0));
 				ship_shape.insert(0, Ship::new(ctx));
 			}
+		}
+	}
+
+	pub fn update_scoreboard(&mut self, ctx: &mut Context) {
+		if self.7 == true {
+			self.scoreboard(ctx);
+			self.7 = false;
 		}
 	}
 
