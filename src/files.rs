@@ -1,9 +1,9 @@
-use pelican_ui::*;
+use pelican::*;
 use runtime::{self, Service, ServiceList, ThreadContext, async_trait, Services};
-use pelican_ui::drawable::{Component, Image};
-use pelican_ui::events::{Event, OnEvent, TickEvent, KeyboardEvent, KeyboardState, NamedKey, Key};
-use pelican_ui::drawable::{Shape, Color, Drawable, ShapeType, Align};
-use pelican_ui::layout::{SizeRequest, Area, Layout};
+use pelican::drawable::{Component, Image};
+use pelican::events::{Event, OnEvent, TickEvent, KeyboardEvent, KeyboardState, NamedKey, Key};
+use pelican::drawable::{Shape, Color, Drawable, ShapeType, Align};
+use pelican::layout::{SizeRequest, Area, Layout};
 use std::collections::BTreeMap;
 use serde::{Serialize, Deserialize};
 
@@ -16,7 +16,7 @@ impl Services for TestApp {}
 
 impl Application for TestApp {
     async fn new(ctx: &mut Context) -> Box<dyn Drawable> {
-		ctx.theme = Theme::new(
+		/*ctx.theme = Theme::new(
 			ColorResources::new(
 				BackgroundColor{
 					primary: Color::from_hex("808080", 255),
@@ -33,7 +33,7 @@ impl Application for TestApp {
 			IconResources::default(&mut ctx.assets),
 			BrandResources::default(&mut ctx.assets),
 			LayoutResources::default(),
-		);
+		);*/
 		let first = FolderPage::new(ctx);
         let first = Interface::new(ctx, Box::new(first), None, None);
         let second = SecondPage::new(ctx);
@@ -66,15 +66,15 @@ impl Event for NavEvent{
 }
 
 #[derive(Debug, Component)]
-pub struct ListItem(Stack, ListItemGroup);
-impl OnEvent for ListItem{}
-impl ListItem {
+pub struct Files(Stack, ListItemGroup);
+impl OnEvent for Files{}
+impl Files {
 	pub fn new(ctx: &mut Context) -> Self {
-		let icon = Icon::new(ctx, "wallet", color, 150.0);
-		let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet", AvatarIconStyle::Success), ListItemInfoLeft::new("folder", "random file", None, None), 
-		ListItem(
+		let icon = Icon::new(ctx, "wallet", Color::from_hex("#FF0000", 255), 150.0);
+		let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet", AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
+		Files(
 			Stack(Offset::Center, Offset::Center, Size::Fit    , Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
-			ListItemGroup::new(item: Vec<ListItem>)
+			ListItemGroup::new(vec![item]),
 		)
 	}
 }
