@@ -374,7 +374,7 @@ impl FirstScreen {
 			let radii = ship_radius + asteroid_radius;
 			if distance_x < radii && distance_y < radii {
 				println!("collision detected");
-				remove_elements.push(index + 1);
+				remove_elements.push(index);
 				self.4 = true;
 				self.7 = true;
 			}
@@ -389,9 +389,8 @@ impl FirstScreen {
 		}
 		for &i in remove_elements.iter() {
 			//add one to the index of offset because it's always behind 1 for some reason
-			let offset_add = i + 1;
-			shape.remove(i.checked_sub(1).unwrap());
-			offset.remove(offset_add.checked_sub(1).unwrap());
+			shape.remove(i);
+			offset.remove(i + 1);
 			//so we know that if we hardcode 4 in, it'll not shift 3's shape into its position. so why is it deleting 3's index instead of 4's?
 		}
 		if self.4 == true {
