@@ -1,15 +1,19 @@
 use pelican::*;
-use runtime::{self, Service, ServiceList, ThreadContext, async_trait, Services};
-use pelican::drawable::{Component, Image};
-use pelican::events::{Event, OnEvent, TickEvent, KeyboardEvent, KeyboardState, NamedKey, Key};
-use pelican::drawable::{Shape, Color, Drawable, ShapeType, Align};
-use pelican::layout::{SizeRequest, Area, Layout};
+use pelican_ui::*;
+use pelican_ui::components::interface::general::{Interface, Page, Content, Header};
+use pelican_ui::components::interface::navigation::AppPage;
+use pelican_ui::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
+use pelican_ui::components::avatar::{AvatarContent, AvatarIconStyle};
+use pelican_ui::components::Icon;
+use pelican_ui::layouts::{Stack, EitherOr, Offset, Size, Padding};
+use pelican_ui::drawable::{Drawable, Color};
+use pelican_ui::events::{OnEvent, Event, KeyboardEvent, KeyboardState, TickEvent};
+
 use std::collections::BTreeMap;
 use serde::{Serialize, Deserialize};
 
-use pelican_ui_std::*;
 pub struct TestApp;
-impl Plugins for TestApp {
+impl Plugin for TestApp {
     fn plugins(ctx: &mut Context) -> Vec<Box<dyn Plugin>> {vec![]}
 }
 impl Services for TestApp {}
@@ -49,7 +53,7 @@ impl Application for TestApp {
 #[derive(Debug, Component)]
 pub struct CustomNavigation(Stack, EitherOr<Interface, Interface>);
 impl OnEvent for CustomNavigation{
-	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<(dyn pelican_ui::events::Event + 'static)>> {
 		if let Some(nav_event) = event.downcast_ref::<NavEvent>() {
 			self.1.display_left(nav_event.0);
 			false
@@ -70,7 +74,7 @@ pub struct Files(Stack, ListItemGroup);
 impl OnEvent for Files{}
 impl Files {
 	pub fn new(ctx: &mut Context) -> Self {
-		let icon = Icon::new(ctx, "wallet", Color::from_hex("#FF0000", 255), 150.0);
+		let icon = Icon::new(ctx, "wallet", Some(Color::from_hex("#FF0000", 255)), 150.0);
 		let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet", AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
 		Files(
 			Stack(Offset::Center, Offset::Center, Size::Fit    , Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),

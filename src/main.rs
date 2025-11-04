@@ -8,11 +8,11 @@ use std::any::Any;
 use pelican_ui::*;
 use runtime::{self, Service, ServiceList, ThreadContext, async_trait, Services};
 use serde::de::Unexpected::Str;
-use pelican_ui::drawable::Component;
+use pelican::drawable::Component;
 
-use pelican_ui::events::{Event, OnEvent, TickEvent, KeyboardEvent, KeyboardState, NamedKey, Key};
-use pelican_ui::drawable::{Shape, Color, Drawable, ShapeType, Align};
-use pelican_ui::layout::{SizeRequest, Area, Layout};
+use pelican::events::{Event, OnEvent, TickEvent, KeyboardEvent, KeyboardState, NamedKey, Key};
+use pelican::drawable::{Shape, Color, Drawable, ShapeType, Align};
+use pelican::layout::{SizeRequest, Area, Layout};
 
 use std::collections::BTreeMap;
 use serde::{Serialize, Deserialize};
@@ -289,7 +289,7 @@ impl SecondPage {
 		SecondPage(Stack::default(), Page::new(Some(header), content, None))
 	}
 }*/
-use pelican_ui::{maverick_start, MaverickOS, PelicanEngine};
+//use pelican_ui::{maverick_start, MaverickOS, PleicanEngine};
 mod files;
 pelican_ui::start!(files::TestApp);
 fn main() {
