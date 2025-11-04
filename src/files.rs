@@ -1,7 +1,7 @@
 use pelican::*;
 use pelican_ui::*;
 use pelican_ui::components::interface::general::{Interface, Page, Content, Header};
-use pelican_ui::components::interface::navigation::AppPage;
+use pelican_ui::components::interface::navigation::{AppPage, PelicanError};
 use pelican_ui::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
 use pelican_ui::components::avatar::{AvatarContent, AvatarIconStyle};
 use pelican_ui::components::Icon;
@@ -14,7 +14,6 @@ use serde::{Serialize, Deserialize};
 
 pub struct TestApp;
 impl Plugin for TestApp {
-    fn plugins(ctx: &mut Context) -> Vec<Box<dyn Plugin>> {vec![]}
 }
 impl Services for TestApp {}
 
@@ -39,9 +38,9 @@ impl Application for TestApp {
 			LayoutResources::default(),
 		);*/
 		let first = FolderPage::new(ctx);
-        let first = Interface::new(ctx, Box::new(first), None, None);
+        let first = Interface::new(ctx, vec![]);
         let second = SecondPage::new(ctx);
-        let second = Interface::new(ctx, Box::new(second), None, None);
+        let second = Interface::new(ctx, vec![]);
         Box::new(CustomNavigation(Stack::default(), EitherOr::new(first, second)))
 /*        Box::new(Shape{
             shape: ShapeType::Ellipse(0.0, (400.0, 400.0), 0.0),
@@ -56,15 +55,17 @@ impl OnEvent for CustomNavigation{
 	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<(dyn pelican_ui::events::Event + 'static)>> {
 		if let Some(nav_event) = event.downcast_ref::<NavEvent>() {
 			self.1.display_left(nav_event.0);
-			false
-		} else {true}
+			vec![event]
+		} else {
+			vec![event]
+		}
 	}
 }
 
 #[derive(Debug, Clone)]
 pub struct NavEvent(bool);
 impl Event for NavEvent{
-	fn pass(self: Box<Self>, ctx: &mut Context, children: Vec<((f32, f32), (f32, f32))>) -> Vec<Option<Box<dyn Event>>> {
+	fn pass(self: Box<Self>, ctx: &mut Context, children: &Vec<((f32, f32), (f32, f32))>) -> Vec<Option<Box<dyn Event>>> {
 		children.iter().map(|_| Some(self.clone() as Box<dyn Event>)).collect()
 	}
 }
@@ -75,7 +76,7 @@ impl OnEvent for Files{}
 impl Files {
 	pub fn new(ctx: &mut Context) -> Self {
 		let icon = Icon::new(ctx, "wallet", Some(Color::from_hex("#FF0000", 255)), 150.0);
-		let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet", AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
+		let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet".to_string(), AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
 		Files(
 			Stack(Offset::Center, Offset::Center, Size::Fit    , Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 			ListItemGroup::new(vec![item]),
@@ -86,19 +87,18 @@ impl Files {
 #[derive(Debug, Component)]
 pub struct FolderPage(Stack, Page);
 impl OnEvent for FolderPage {
-	fn on_event(&mut self, ctx: &mut Context, event: &mut dyn Event) -> bool {
+	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 
 		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 
 		}
-		true
+		vec![event]
 	}
 }
 
 impl AppPage for FolderPage {
-	fn has_nav(&self) -> bool { true }
-	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<dyn AppPage>, Box<dyn AppPage>> { Err(self) }
+	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<(dyn AppPage + 'static)>, PelicanError>> { Err(Ok(self)) }
 }
 
 impl FolderPage {
@@ -108,7 +108,7 @@ impl FolderPage {
 
         let header = Header::home(ctx, "Folder Page", None);
 		let current = 0;
-        FolderPage(Stack::default(), Page::new(Some(header), content, None))
+        FolderPage(Stack::default(), Page::new(header, content, None))
     }
 }
 
@@ -116,17 +116,16 @@ impl FolderPage {
 pub struct SecondPage(Stack, Page);
 impl OnEvent for SecondPage {}
 impl AppPage for SecondPage {
-	fn has_nav(&self) -> bool { true }
-	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<dyn AppPage>, Box<dyn AppPage>> { Err(self) }
+	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<dyn AppPage + 'static>, PelicanError> { Err(self) }
 }
 
 impl SecondPage {
 	pub fn new(ctx: &mut Context) -> Self {
-		let color = ctx.theme.colors.text.heading;
-        let icon = Icon::new(ctx, "down", color, 128.0);
+		//let color = ctx.theme.colors.text.heading;
+        //let icon = Icon::new(ctx, "down", color, 128.0);
 		let child: Vec<Box<dyn Drawable>> = vec![];
         let header = Header::home(ctx, "CONGRATULATIONS", None);
         let content = Content::new(ctx, Offset::Center, child);
-		SecondPage(Stack::default(), Page::new(Some(header), content, None))
+		SecondPage(Stack::default(), Page::new(header, content, None))
 	}
 }
