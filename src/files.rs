@@ -38,9 +38,9 @@ impl Application for TestApp {
 			LayoutResources::default(),
 		);*/
 		let first = FolderPage::new(ctx);
-        let first = Interface::new(ctx, vec![]);
+        let first = Interface::new(ctx, (vec![], None));
         let second = SecondPage::new(ctx);
-        let second = Interface::new(ctx, vec![]);
+        let second = Interface::new(ctx, (vec![], None));
         Box::new(CustomNavigation(Stack::default(), EitherOr::new(first, second)))
 /*        Box::new(Shape{
             shape: ShapeType::Ellipse(0.0, (400.0, 400.0), 0.0),
@@ -98,7 +98,9 @@ impl OnEvent for FolderPage {
 }
 
 impl AppPage for FolderPage {
-	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<(dyn AppPage + 'static)>, PelicanError>> { Err(Ok(self)) }
+	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<(dyn AppPage + 'static)>, PelicanError> {
+ 		todo!()
+	}
 }
 
 impl FolderPage {
@@ -115,9 +117,9 @@ impl FolderPage {
 #[derive(Debug, Component)]
 pub struct SecondPage(Stack, Page);
 impl OnEvent for SecondPage {}
-impl AppPage for SecondPage {
+/*impl AppPage for SecondPage {
 	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<dyn AppPage + 'static>, PelicanError> { Err(self) }
-}
+}*/
 
 impl SecondPage {
 	pub fn new(ctx: &mut Context) -> Self {
