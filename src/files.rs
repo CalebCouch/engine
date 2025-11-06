@@ -1,23 +1,36 @@
 use pelican::*;
 use pelican_ui::*;
 use pelican_ui::components::interface::general::{Interface, Page, Content, Header};
-use pelican_ui::components::interface::navigation::{AppPage, PelicanError};
+use pelican_ui::components::interface::navigation::{AppPage, PelicanError, RootInfo};
 use pelican_ui::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
 use pelican_ui::components::avatar::{AvatarContent, AvatarIconStyle};
 use pelican_ui::components::Icon;
 use pelican_ui::layouts::{Stack, EitherOr, Offset, Size, Padding};
 use pelican_ui::drawable::{Drawable, Color};
 use pelican_ui::events::{OnEvent, Event, KeyboardEvent, KeyboardState, TickEvent};
+use pelican_ui::theme::Theme;
+use pelican_ui::plugin::PelicanUI;
 
 use std::collections::BTreeMap;
 use serde::{Serialize, Deserialize};
 
 pub struct TestApp;
-impl Plugin for TestApp {
+impl Plugin for TestApp {}
+impl Application for TestApp {
+	async fn new(ctx: &mut Context) -> impl Drawable {
+		let home = RootInfo::icon("home", "my files", |ctx: &mut Context| {
+			Box::new(FolderPage::new(ctx)) as Box<dyn AppPage>
+		});
+		Interface::new(ctx, (vec![home], None))
+	}
+	fn plugins(ctx: &mut Context) -> Vec<Box<dyn Plugin>> {
+		let theme = Theme::light(&mut ctx.assets, Color::from_hex("#00bf69ff", 255));
+		vec![Box::new(PelicanUI::new(ctx, theme))]
+	}
 }
 impl Services for TestApp {}
 
-impl Application for TestApp {
+/*impl Application for TestApp {
     async fn new(ctx: &mut Context) -> Box<dyn Drawable> {
 		/*ctx.theme = Theme::new(
 			ColorResources::new(
@@ -47,7 +60,7 @@ impl Application for TestApp {
             color: Color(0, 0, 255, 255)
         })*/
     }
-}
+}*/
 
 #[derive(Debug, Component)]
 pub struct CustomNavigation(Stack, EitherOr<Interface, Interface>);
@@ -67,6 +80,16 @@ pub struct NavEvent(bool);
 impl Event for NavEvent{
 	fn pass(self: Box<Self>, ctx: &mut Context, children: &Vec<((f32, f32), (f32, f32))>) -> Vec<Option<Box<dyn Event>>> {
 		children.iter().map(|_| Some(self.clone() as Box<dyn Event>)).collect()
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct Bumper(Row, Files, Files);
+impl Bumper {
+	pub fn new(ctx: &mut Context) -> Self {
+		Bumper(
+
+		)
 	}
 }
 
@@ -105,7 +128,7 @@ impl AppPage for FolderPage {
 
 impl FolderPage {
     pub fn new(ctx: &mut Context) -> Self {
-		let children: Vec<Box<dyn Drawable>> = vec![];
+		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
         let content = Content::new(ctx, Offset::Center, children);
 
         let header = Header::home(ctx, "Folder Page", None);
