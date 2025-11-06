@@ -5,8 +5,8 @@ use pelican_ui::components::interface::navigation::{AppPage, PelicanError, RootI
 use pelican_ui::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
 use pelican_ui::components::avatar::{AvatarContent, AvatarIconStyle};
 use pelican_ui::components::Icon;
-use pelican_ui::layouts::{Stack, EitherOr, Offset, Size, Padding};
-use pelican_ui::drawable::{Drawable, Color};
+use pelican_ui::layouts::{Stack, EitherOr, Offset, Size, Padding, Row};
+use pelican_ui::drawable::{Drawable, Color, Shape, ShapeType};
 use pelican_ui::events::{OnEvent, Event, KeyboardEvent, KeyboardState, TickEvent};
 use pelican_ui::theme::Theme;
 use pelican_ui::plugin::PelicanUI;
@@ -84,11 +84,79 @@ impl Event for NavEvent{
 }
 
 #[derive(Debug, Component)]
-pub struct Bumper(Row, Files, Files);
+pub struct NewFile(Stack, Shape, Text);
+impl OnEvent for NewFile{
+	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+
+		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
+			//push File component? we want to get it to the content vec but how? refer to drawing game, i think it'll refresh me
+			//maybe push to a separate component that stores all the files.
+		}
+		vec![event]
+	}
+}
+impl NewFile{
+	pub fn new(ctx: &mut Context) -> Self {
+		NewFile(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Ellipse(5.0, (25.0, 25.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+		)
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct NewFolder(Stack, Shape, Text);
+impl OnEvent for NewFolder{
+	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+
+		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
+
+		}
+		vec![event]
+	}
+}
+impl NewFolder{
+	pub fn new(ctx: &mut Context) -> Self {
+		NewFolder(
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Ellipse(5.0, (25.0, 25.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+		)
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct BumperRow(Row, NewFile, NewFolder);
+impl OnEvent for BumperRow{}
+impl BumperRow {
+	pub fn new(ctx: &mut Context) -> Self {
+		BumperRow(
+			Row::center(10.0),
+			NewFile::new(ctx),
+			NewFolder::new(ctx),
+		)
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct Bumper(Stack, Shape, BumperRow);
+impl OnEvent for Bumper{}
 impl Bumper {
 	pub fn new(ctx: &mut Context) -> Self {
 		Bumper(
-
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+			Shape{
+				shape: ShapeType::Rectangle(5.0, (70.0, 45.0), 0.0),
+				color: Color::from_hex("#000000", 255),
+			},
+			BumperRow::new(ctx),
 		)
 	}
 }
@@ -128,7 +196,7 @@ impl AppPage for FolderPage {
 
 impl FolderPage {
     pub fn new(ctx: &mut Context) -> Self {
-		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
+		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Bumper::new(ctx))];
         let content = Content::new(ctx, Offset::Center, children);
 
         let header = Header::home(ctx, "Folder Page", None);
