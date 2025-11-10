@@ -1,10 +1,11 @@
 use pelican::*;
 use pelican_ui::*;
-use pelican_ui::components::interface::general::{Interface, Page, Content, Header};
+use pelican_ui::components::interface::general::{Interface, Page, Content, Header, Bumper};
 use pelican_ui::components::interface::navigation::{AppPage, PelicanError, RootInfo};
 use pelican_ui::components::list_item::{ListItemGroup, ListItem, ListItemInfoLeft};
 use pelican_ui::components::avatar::{AvatarContent, AvatarIconStyle};
 use pelican_ui::components::Icon;
+use pelican_ui::components::button::PrimaryButton;
 use pelican_ui::layouts::{Stack, EitherOr, Offset, Size, Padding, Row};
 use pelican_ui::drawable::{Drawable, Color, Shape, ShapeType};
 use pelican_ui::events::{OnEvent, Event, KeyboardEvent, KeyboardState, TickEvent};
@@ -84,7 +85,7 @@ impl Event for NavEvent{
 }
 
 #[derive(Debug, Component)]
-pub struct NewFile(Stack, Shape, Text);
+pub struct NewFile(Stack, Shape);
 impl OnEvent for NewFile{
 	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -109,7 +110,7 @@ impl NewFile{
 }
 
 #[derive(Debug, Component)]
-pub struct NewFolder(Stack, Shape, Text);
+pub struct NewFolder(Stack, Shape);
 impl OnEvent for NewFolder{
 	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
@@ -145,7 +146,7 @@ impl BumperRow {
 	}
 }
 
-#[derive(Debug, Component)]
+/*#[derive(Debug, Component)]
 pub struct Bumper(Stack, Shape, BumperRow);
 impl OnEvent for Bumper{}
 impl Bumper {
@@ -159,7 +160,7 @@ impl Bumper {
 			BumperRow::new(ctx),
 		)
 	}
-}
+}*/
 
 #[derive(Debug, Component)]
 pub struct Files(Stack, ListItemGroup);
@@ -196,12 +197,16 @@ impl AppPage for FolderPage {
 
 impl FolderPage {
     pub fn new(ctx: &mut Context) -> Self {
-		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Bumper::new(ctx))];
+		let file_button = PrimaryButton::new(ctx, "new file", |ctx: &mut Context| {println!("it worked");}, false);
+		let folder_button = PrimaryButton::new(ctx, "new folder", |ctx: &mut Context| {println!("it worked");}, false);
+		let buttons: Vec<Box<dyn Drawable>> = vec![Box::new(file_button), Box::new(folder_button)];
+		let bumper = Bumper::new(ctx, buttons);
+		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
         let content = Content::new(ctx, Offset::Center, children);
 
         let header = Header::home(ctx, "Folder Page", None);
 		let current = 0;
-        FolderPage(Stack::default(), Page::new(header, content, None))
+        FolderPage(Stack::default(), Page::new(header, content, Some(bumper)))
     }
 }
 
