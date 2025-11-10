@@ -197,33 +197,41 @@ impl AppPage for FolderPage {
 
 impl FolderPage {
     pub fn new(ctx: &mut Context) -> Self {
-		let file_button = PrimaryButton::new(ctx, "new file", |ctx: &mut Context| {println!("it worked");}, false);
-		let folder_button = PrimaryButton::new(ctx, "new folder", |ctx: &mut Context| {println!("it worked");}, false);
+		//make separate variable we push into then push that into children varaible?
+		//maybe we can push another Vec<box> drawables into content?
+		//maybe we can use find_at?
+		let mut new_files: Vec<Box<dyn Drawable>> = vec![];
+		let mut children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
+		let file_button = PrimaryButton::new(ctx, "new file", move |ctx: &mut Context|{
+			new_files.push(Box::new(Files::new(ctx)));
+		}, false);
+		let folder_button = PrimaryButton::new(ctx, "new folder", |ctx: &mut Context|{
+			println!("it worked");
+		}, false);
+		children.push(new_files[0]);
 		let buttons: Vec<Box<dyn Drawable>> = vec![Box::new(file_button), Box::new(folder_button)];
 		let bumper = Bumper::new(ctx, buttons);
-		let children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
-        let content = Content::new(ctx, Offset::Center, children);
 
         let header = Header::home(ctx, "Folder Page", None);
-		let current = 0;
+        let content = Content::new(ctx, Offset::Center, children);
         FolderPage(Stack::default(), Page::new(header, content, Some(bumper)))
     }
 }
 
 #[derive(Debug, Component)]
-pub struct SecondPage(Stack, Page);
-impl OnEvent for SecondPage {}
+pub struct FilePage(Stack, Page);
+impl OnEvent for FilePage {}
 /*impl AppPage for SecondPage {
 	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<dyn AppPage + 'static>, PelicanError> { Err(self) }
 }*/
 
-impl SecondPage {
+impl FilePage {
 	pub fn new(ctx: &mut Context) -> Self {
 		//let color = ctx.theme.colors.text.heading;
         //let icon = Icon::new(ctx, "down", color, 128.0);
 		let child: Vec<Box<dyn Drawable>> = vec![];
         let header = Header::home(ctx, "CONGRATULATIONS", None);
         let content = Content::new(ctx, Offset::Center, child);
-		SecondPage(Stack::default(), Page::new(header, content, None))
+		FilePage(Stack::default(), Page::new(header, content, None))
 	}
 }
