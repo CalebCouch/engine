@@ -20,7 +20,7 @@ impl Plugin for TestApp {}
 impl Application for TestApp {
 	async fn new(ctx: &mut Context) -> impl Drawable {
 		let home = RootInfo::icon("home", "my files", |ctx: &mut Context| {
-			Box::new(FolderPage::new(ctx)) as Box<dyn AppPage>
+			Box::new(FolderPage::new(ctx, false)) as Box<dyn AppPage>
 		});
 		Interface::new(ctx, (vec![home], None))
 	}
@@ -196,22 +196,23 @@ impl AppPage for FolderPage {
 }
 
 impl FolderPage {
-    pub fn new(ctx: &mut Context) -> Self {
+    pub fn new(ctx: &mut Context, mut id: bool) -> Self {
 		//make separate variable we push into then push that into children varaible?
 		//maybe we can push another Vec<box> drawables into content?
 		//maybe we can use find_at?
-		let mut new_files: Vec<Box<dyn Drawable>> = vec![];
+		//maybe make separate function? but how would we give argument to Bumper
+		//maybe we can make another content that only stores File::new and we can use find_at on that?
 		let mut children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
 		let file_button = PrimaryButton::new(ctx, "new file", move |ctx: &mut Context|{
-			new_files.push(Box::new(Files::new(ctx)));
+			//how the hell do we get anything out of scope??
+			//children.push(Box::new(Files::new(ctx)));
 		}, false);
+		println!("{}", id);
 		let folder_button = PrimaryButton::new(ctx, "new folder", |ctx: &mut Context|{
 			println!("it worked");
 		}, false);
-		children.push(new_files[0]);
 		let buttons: Vec<Box<dyn Drawable>> = vec![Box::new(file_button), Box::new(folder_button)];
 		let bumper = Bumper::new(ctx, buttons);
-
         let header = Header::home(ctx, "Folder Page", None);
         let content = Content::new(ctx, Offset::Center, children);
         FolderPage(Stack::default(), Page::new(header, content, Some(bumper)))
