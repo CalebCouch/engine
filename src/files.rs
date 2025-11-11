@@ -8,7 +8,7 @@ use pelican_ui::components::Icon;
 use pelican_ui::components::button::PrimaryButton;
 use pelican_ui::layouts::{Stack, EitherOr, Offset, Size, Padding, Row};
 use pelican_ui::drawable::{Drawable, Color, Shape, ShapeType};
-use pelican_ui::events::{OnEvent, Event, KeyboardEvent, KeyboardState, TickEvent};
+use pelican_ui::events::{OnEvent, Event, KeyboardEvent, KeyboardState, TickEvent, Key, NamedKey};
 use pelican_ui::theme::Theme;
 use pelican_ui::plugin::PelicanUI;
 
@@ -104,7 +104,10 @@ impl OnEvent for FolderPage {
 	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
-
+			if *key == Key::Named(NamedKey::Space) {
+				let canvas = self.1.content().find_at::<Files>(0).unwrap();
+				println!("this many files {:?}", canvas.1);
+			}
 		}
 		vec![event]
 	}
@@ -128,13 +131,14 @@ impl FolderPage {
 			fn on_event(ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 				if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 					let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet".to_string(), AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
+					ctx.state();
+					//can't use find_at because content is out of scope and we would lose ownership anyways
 					ctx.state().get_mut_or_default::<Vec<Files>>().push(Files(
 						Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 						ListItemGroup::new(vec![item]),
 					));
 					return vec![event];
-				} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
-				}
+				} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {}
 				vec![event]
 			}
 		}, false);
