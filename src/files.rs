@@ -103,7 +103,6 @@ pub struct FolderPage(Stack, Page);
 impl OnEvent for FolderPage {
 	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-
 		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 
 		}
@@ -126,14 +125,17 @@ impl FolderPage {
 		//maybe we can make another content that only stores File::new and we can use find_at on that?
 		let mut children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
 		let file_button = PrimaryButton::new(ctx, "new file", move |ctx: &mut Context|{
-			fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
+			fn on_event(ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 				if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 					let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet".to_string(), AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
 					ctx.state().get_mut_or_default::<Vec<Files>>().push(Files(
 						Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 						ListItemGroup::new(vec![item]),
-					))
+					));
+					return vec![event];
+				} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 				}
+				vec![event]
 			}
 		}, false);
 		let folder_button = PrimaryButton::new(ctx, "new folder", |ctx: &mut Context|{
