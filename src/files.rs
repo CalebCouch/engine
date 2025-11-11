@@ -20,7 +20,7 @@ impl Plugin for TestApp {}
 impl Application for TestApp {
 	async fn new(ctx: &mut Context) -> impl Drawable {
 		let home = RootInfo::icon("home", "my files", |ctx: &mut Context| {
-			Box::new(FolderPage::new(ctx, false)) as Box<dyn AppPage>
+			Box::new(FolderPage::new(ctx)) as Box<dyn AppPage>
 		});
 		Interface::new(ctx, (vec![home], None))
 	}
@@ -85,84 +85,6 @@ impl Event for NavEvent{
 }
 
 #[derive(Debug, Component)]
-pub struct NewFile(Stack, Shape);
-impl OnEvent for NewFile{
-	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
-		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-
-		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
-			//push File component? we want to get it to the content vec but how? refer to drawing game, i think it'll refresh me
-			//maybe push to a separate component that stores all the files.
-		}
-		vec![event]
-	}
-}
-impl NewFile{
-	pub fn new(ctx: &mut Context) -> Self {
-		NewFile(
-			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
-			Shape{
-				shape: ShapeType::Ellipse(5.0, (25.0, 25.0), 0.0),
-				color: Color::from_hex("#000000", 255),
-			},
-		)
-	}
-}
-
-#[derive(Debug, Component)]
-pub struct NewFolder(Stack, Shape);
-impl OnEvent for NewFolder{
-	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
-		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-
-		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
-
-		}
-		vec![event]
-	}
-}
-impl NewFolder{
-	pub fn new(ctx: &mut Context) -> Self {
-		NewFolder(
-			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
-			Shape{
-				shape: ShapeType::Ellipse(5.0, (25.0, 25.0), 0.0),
-				color: Color::from_hex("#000000", 255),
-			},
-		)
-	}
-}
-
-#[derive(Debug, Component)]
-pub struct BumperRow(Row, NewFile, NewFolder);
-impl OnEvent for BumperRow{}
-impl BumperRow {
-	pub fn new(ctx: &mut Context) -> Self {
-		BumperRow(
-			Row::center(10.0),
-			NewFile::new(ctx),
-			NewFolder::new(ctx),
-		)
-	}
-}
-
-/*#[derive(Debug, Component)]
-pub struct Bumper(Stack, Shape, BumperRow);
-impl OnEvent for Bumper{}
-impl Bumper {
-	pub fn new(ctx: &mut Context) -> Self {
-		Bumper(
-			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
-			Shape{
-				shape: ShapeType::Rectangle(5.0, (70.0, 45.0), 0.0),
-				color: Color::from_hex("#000000", 255),
-			},
-			BumperRow::new(ctx),
-		)
-	}
-}*/
-
-#[derive(Debug, Component)]
 pub struct Files(Stack, ListItemGroup);
 impl OnEvent for Files{}
 impl Files {
@@ -196,7 +118,7 @@ impl AppPage for FolderPage {
 }
 
 impl FolderPage {
-    pub fn new(ctx: &mut Context, mut id: bool) -> Self {
+    pub fn new(ctx: &mut Context) -> Self {
 		//make separate variable we push into then push that into children varaible?
 		//maybe we can push another Vec<box> drawables into content?
 		//maybe we can use find_at?
@@ -204,10 +126,16 @@ impl FolderPage {
 		//maybe we can make another content that only stores File::new and we can use find_at on that?
 		let mut children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
 		let file_button = PrimaryButton::new(ctx, "new file", move |ctx: &mut Context|{
-			//how the hell do we get anything out of scope??
-			//children.push(Box::new(Files::new(ctx)));
+			fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
+				if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+					let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet".to_string(), AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
+					ctx.state().get_mut_or_default::<Vec<Files>>().push(Files(
+						Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+						ListItemGroup::new(vec![item]),
+					))
+				}
+			}
 		}, false);
-		println!("{}", id);
 		let folder_button = PrimaryButton::new(ctx, "new folder", |ctx: &mut Context|{
 			println!("it worked");
 		}, false);
