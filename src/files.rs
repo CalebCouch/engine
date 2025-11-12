@@ -103,11 +103,9 @@ pub struct FolderPage(Stack, Page);
 impl OnEvent for FolderPage {
 	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+			ctx.state().get_mut_or_default::<Vec<Files>>();
 		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
-			if *key == Key::Named(NamedKey::Space) {
-				let canvas = self.1.content().find_at::<Files>(0).unwrap();
-				println!("this many files {:?}", canvas.1);
-			}
+
 		}
 		vec![event]
 	}
@@ -121,30 +119,24 @@ impl AppPage for FolderPage {
 
 impl FolderPage {
     pub fn new(ctx: &mut Context) -> Self {
-		//make separate variable we push into then push that into children varaible?
-		//maybe we can push another Vec<box> drawables into content?
-		//maybe we can use find_at?
-		//maybe make separate function? but how would we give argument to Bumper
-		//maybe we can make another content that only stores File::new and we can use find_at on that?
+		//let files = ctx.state().get_mut_or_default::<Vec<Files>>();
 		let mut children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
+		//children.push(Box::new(files[0]));
 		let file_button = PrimaryButton::new(ctx, "new file", move |ctx: &mut Context|{
-			fn on_event(ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
-				println!("yo");
-				if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-					let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet".to_string(), AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
-					//we push into context, creating a new vec of Files. so effectively, with each click, we push a new ListItem into this Vec of files. we have to know how to extract it now tho, which is the issue.
-					let files = ctx.state().get_mut_or_default::<Vec<Files>>();
-					files.push(Files(
-						Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
-						ListItemGroup::new(vec![item]),
-					));
-					for f in files {
-						println!("{:?}", f);
-					}
-					return vec![event];
-				} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {}
-				vec![event]
-			}
+			let item = ListItem::new(
+				ctx,
+				Some(AvatarContent::Icon("wallet".to_string(),
+				AvatarIconStyle::Success)),
+				ListItemInfoLeft::new("folder", "random file", None, None),
+				None, None, None,
+				|ctx: &mut Context| println!("it worked")
+			);
+			let file = ctx.state().get_mut_or_default::<Vec<Files>>();
+			file.push(Files(
+				Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+				ListItemGroup::new(vec![item]),
+			));
+			println!("{:?}", file);
 		}, false);
 		let folder_button = PrimaryButton::new(ctx, "new folder", |ctx: &mut Context|{
 			println!("it worked");
