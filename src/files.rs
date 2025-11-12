@@ -129,14 +129,18 @@ impl FolderPage {
 		let mut children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
 		let file_button = PrimaryButton::new(ctx, "new file", move |ctx: &mut Context|{
 			fn on_event(ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
+				println!("yo");
 				if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 					let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet".to_string(), AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
-					ctx.state();
-					//can't use find_at because content is out of scope and we would lose ownership anyways
-					ctx.state().get_mut_or_default::<Vec<Files>>().push(Files(
+					//we push into context, creating a new vec of Files. so effectively, with each click, we push a new ListItem into this Vec of files. we have to know how to extract it now tho, which is the issue.
+					let files = ctx.state().get_mut_or_default::<Vec<Files>>();
+					files.push(Files(
 						Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
 						ListItemGroup::new(vec![item]),
 					));
+					for f in files {
+						println!("{:?}", f);
+					}
 					return vec![event];
 				} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {}
 				vec![event]
@@ -145,6 +149,11 @@ impl FolderPage {
 		let folder_button = PrimaryButton::new(ctx, "new folder", |ctx: &mut Context|{
 			println!("it worked");
 		}, false);
+
+		let move_button = PrimaryButton::new(ctx, "new folder", |ctx: &mut Context|{
+			println!("it worked");
+		}, false);
+
 		let buttons: Vec<Box<dyn Drawable>> = vec![Box::new(file_button), Box::new(folder_button)];
 		let bumper = Bumper::new(ctx, buttons);
         let header = Header::home(ctx, "Folder Page", None);
@@ -168,5 +177,23 @@ impl FilePage {
         let header = Header::home(ctx, "CONGRATULATIONS", None);
         let content = Content::new(ctx, Offset::Center, child);
 		FilePage(Stack::default(), Page::new(header, content, None))
+	}
+}
+
+#[derive(Debug, Component)]
+pub struct MovePage(Stack, Page);
+impl OnEvent for MovePage {}
+/*impl AppPage for SecondPage {
+	fn navigate(self: Box<Self>, _ctx: &mut Context, _index: usize) -> Result<Box<dyn AppPage + 'static>, PelicanError> { Err(self) }
+}*/
+
+impl MovePage {
+	pub fn new(ctx: &mut Context) -> Self {
+		//let color = ctx.theme.colors.text.heading;
+        //let icon = Icon::new(ctx, "down", color, 128.0);
+		let child: Vec<Box<dyn Drawable>> = vec![];
+        let header = Header::home(ctx, "CONGRATULATIONS", None);
+        let content = Content::new(ctx, Offset::Center, child);
+		MovePage(Stack::default(), Page::new(header, content, None))
 	}
 }
