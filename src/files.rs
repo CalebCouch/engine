@@ -103,9 +103,21 @@ pub struct FolderPage(Stack, Page);
 impl OnEvent for FolderPage {
 	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-			ctx.state().get_mut_or_default::<Vec<Files>>();
+			let item = ListItem::new(
+				ctx,
+				Some(AvatarContent::Icon("wallet".to_string(),
+				AvatarIconStyle::Success)),
+				ListItemInfoLeft::new("folder", "random file", None, None),
+				None, None, None,
+				|ctx: &mut Context| println!("it worked")
+			);
+			self.1.content().remove::<Files>().unwrap();
+			let file = ctx.state().get_mut_or_default::<Vec<Files>>();
+			file.push(Files(
+				Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+				ListItemGroup::new(vec![item]),
+			));
 		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
-
 		}
 		vec![event]
 	}
@@ -117,6 +129,10 @@ impl AppPage for FolderPage {
 	}
 }
 
+//TODO:
+//PARTIALLY DONE: remove all elements from listitemgroup
+//DONE: read the files from ctx.state()
+//then, create a list from that and push it to the listitemgroup
 impl FolderPage {
     pub fn new(ctx: &mut Context) -> Self {
 		//let files = ctx.state().get_mut_or_default::<Vec<Files>>();
