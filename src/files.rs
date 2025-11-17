@@ -104,9 +104,8 @@ impl OnEvent for FolderPage {
 	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
 			//files is Files stored in ctx.state(). we need to make files equal listitemgroup somehow. how do we do that?
-			
-			self.1.content().find_at::<Files>(0).unwrap().1.children_mut().clear();
-			let files = ctx.state().get_mut_or_default::<Vec<Files>>();
+			self.1.content().find_at::<Files>(0).unwrap().1.children_mut() = vec![];
+			//let files = ctx.state().get_mut_or_default::<Vec<Files>>();
 		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			if *key == Key::Named(NamedKey::Space) {
 				println!("{:?}", self.1.content().find_at::<Files>(0).unwrap().1);
@@ -197,4 +196,8 @@ impl MovePage {
         let content = Content::new(ctx, Offset::Center, child);
 		MovePage(Stack::default(), Page::new(header, content, None))
 	}
+}
+
+enum FileFolder {
+	
 }
