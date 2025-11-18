@@ -125,15 +125,21 @@ pub struct Folder {
 }
 
 impl Folder {
-	fn get_folder(self, ctx: &mut Context, path: String) -> &Folder {
-		path.split('/');
-		println!("{:?}", path);
-		if let Some(file) = self.folders.get(&path) {
-			file
-		} else {
+	fn get_folder(&self, ctx: &mut Context, path: String) -> Option<&Folder> {
+		//create mutable self variable so we don't go back to the root folder
+		let mut find = self;
+		//use split on path and create collection that we iterate through with sub
+		//find variable accesses folders field and we give it a key that brings us to the next folder with each iteration
+		for sub in path.split('/') {
+			find = find.folders.get(sub);
 		}
-		//return the last element of the collection we created?
+		//return the last iteration of path
+		return Some(find);
+		//return the last element of the collection we created? use for loop to iterate to last element?
+		//maybe use if let Some() since we're working with .get()?
+		//could use .last() but is skipping the previous elements bad? pretty sure it needs to navigate through 1 by 1
 	}
+
     //TODO: impl a function like get_folder that accepts a path, splits the path by "/" and then
     //tries to get the sub folder matching the path
     //
