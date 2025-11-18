@@ -19,6 +19,31 @@ pub struct TestApp;
 impl Plugin for TestApp {}
 impl Application for TestApp {
 	async fn new(ctx: &mut Context) -> impl Drawable {
+        let root = ctx.state().get_mut_or_default::<Folder>();
+        *root = Folder{
+            name: "root".to_string(),
+            files: BTreeMap::new(),
+            folders: BTreeMap::from([
+                ("pictures".to_string(), Folder{
+                    name: "pictures".to_string(),
+                    files: BTreeMap::new(),
+                    folders: BTreeMap::from([
+                        ("kittens".to_string(), Folder{
+                            name: "kittens".to_string(),
+                            files: BTreeMap::from([
+                                ("blue_kitten".to_string(), File{
+                                    name: "blue_kitten".to_string(),
+                                    body: "Encoded Image Bytes".to_string()
+                                })
+                            ]),
+                            folders: BTreeMap::new()
+                        })
+                    ])
+                })
+            ])
+        };
+
+
 		let home = RootInfo::icon("home", "my files", |ctx: &mut Context| {
 			Box::new(FolderPage::new(ctx)) as Box<dyn AppPage>
 		});
@@ -84,16 +109,84 @@ impl Event for NavEvent{
 	}
 }
 
+///Describes a File structure with name and a body(this is text we can change like a note later)
+#[derive(Debug, Clone)]
+pub struct File{
+    name: String,
+    body: String
+}
+
+///Describes a Folder structure with a name and a list of child files and folders
+#[derive(Debug, Default, Clone)]
+pub struct Folder {
+    name: String,
+    files: BTreeMap<String, File>,
+    folders: BTreeMap<String, Self>,
+}
+
+impl Folder {
+	fn get_folder(self, ctx: &mut Context, path: String) -> &Folder {
+		path.split('/');
+		println!("{:?}", path);
+		if let Some(file) = self.folders.get(&path) {
+			file
+		} else {
+		}
+		//return the last element of the collection we created?
+	}
+    //TODO: impl a function like get_folder that accepts a path, splits the path by "/" and then
+    //tries to get the sub folder matching the path
+    //
+    //My root folder example would be root.get("pictures/kittens") should return me the folder with
+    //the blue_kitten file
+}
+
+//  ctx.get_or_default::<Folder>().folders.get("pictures").folders.get("kittens")
+//  /pictures/kittens
+
 #[derive(Debug, Component)]
 pub struct Files(Stack, ListItemGroup);
-impl OnEvent for Files{}
+impl OnEvent for Files{
+	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
+		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
+            //Every tick re-create the Files structure to refresh the UI
+            *self = Files::new(ctx, String::new());
+        }
+        vec![event]
+    }
+}
 impl Files {
-	pub fn new(ctx: &mut Context) -> Self {
-		let icon = Icon::new(ctx, "wallet", Some(Color::from_hex("#FF0000", 255)), 150.0);
-		let item = ListItem::new(ctx, Some(AvatarContent::Icon("wallet".to_string(), AvatarIconStyle::Success)), ListItemInfoLeft::new("folder", "random file", None, None), None, None, None, |ctx: &mut Context| println!("it worked"));
+	pub fn new(ctx: &mut Context, path: String) -> Self {
+        //Get the folder out of state
+        let root = ctx.state().get_or_default::<Folder>().clone().folders.remove("pictures").unwrap().folders.remove("kittens").unwrap();
+        //Loop through the files and create a list item for each one
+		let mut files = root.files.into_iter().map(|(name, file)| {
+            let icon = Icon::new(ctx, "wallet", Some(Color::from_hex("#FF0000", 255)), 150.0);
+            ListItem::new(
+                ctx,
+                Some(AvatarContent::Icon("wallet".to_string(), AvatarIconStyle::Success)),
+                ListItemInfoLeft::new("files", &file.name, None, None),
+                None, None, None, |ctx: &mut Context| println!("it worked")
+            )
+        }).collect::<Vec<_>>();
+
+        //Loop through the folders and create a list item for each one
+        let folders = root.folders.into_iter().map(|(name, folder)| {
+            let icon = Icon::new(ctx, "wallet", Some(Color::from_hex("#FF0000", 255)), 150.0);
+            ListItem::new(
+                ctx,
+                Some(AvatarContent::Icon("wallet".to_string(), AvatarIconStyle::Success)),
+                ListItemInfoLeft::new("folder", &folder.name, None, None),
+                None, None, None, |ctx: &mut Context| println!("it worked")
+            )
+        }).collect::<Vec<_>>();
+
+        files.extend(folders);
+
 		Files(
-			Stack(Offset::Center, Offset::Center, Size::Fit    , Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
-			ListItemGroup::new(vec![item]),
+			Stack(Offset::Center, Offset::Center, Size::Fit, Size::Fit, Padding(0.0, 0.0, 0.0, 0.0)),
+                               //Concat the file and folder list items and display
+			ListItemGroup::new(files),
 		)
 	}
 }
@@ -103,9 +196,6 @@ pub struct FolderPage(Stack, Page);
 impl OnEvent for FolderPage {
 	fn on_event(&mut self, ctx: &mut Context, event: Box<(dyn pelican_ui::events::Event + 'static)>) -> Vec<Box<dyn Event>> {
 		if let Some(tick_event) = event.downcast_ref::<TickEvent>() {
-			//files is Files stored in ctx.state(). we need to make files equal listitemgroup somehow. how do we do that?
-			self.1.content().find_at::<Files>(0).unwrap().1.children_mut() = vec![];
-			//let files = ctx.state().get_mut_or_default::<Vec<Files>>();
 		} else if let Some(KeyboardEvent{key, state: KeyboardState::Pressed}) = event.downcast_ref::<KeyboardEvent>() {
 			if *key == Key::Named(NamedKey::Space) {
 				println!("{:?}", self.1.content().find_at::<Files>(0).unwrap().1);
@@ -128,7 +218,7 @@ impl AppPage for FolderPage {
 impl FolderPage {
     pub fn new(ctx: &mut Context) -> Self {
 		//let files = ctx.state().get_mut_or_default::<Vec<Files>>();
-		let mut children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx))];
+		let mut children: Vec<Box<dyn Drawable>> = vec![Box::new(Files::new(ctx, String::new()))];
 		//children.push(Box::new(files[0]));
 		let file_button = PrimaryButton::new(ctx, "new file", move |ctx: &mut Context|{
 			let item = ListItem::new(
